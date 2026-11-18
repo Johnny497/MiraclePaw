@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f6f7ef" />
+  <meta name="description" content="星爪 MiraclePaw — 一隻懂廣東話嘅 AI 虛擬寵物。內部成年持份者試玩版。" />
+  <title>星爪 MiraclePaw｜一齊行一小步</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="app-shell">
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">✿</div>
+        <div><strong>星爪 <span>MiraclePaw</span></strong><small>陪你慢慢嚟。</small></div>
+      </div>
+      <div class="header-label"><span class="status-dot"></span> AI 連線試玩版 <span class="head-sep">·</span> 僅供成年持份者測試</div>
+    </header>
+
+    <main class="dashboard">
+      <section class="story-panel" aria-label="認識爪爪及自願微行動">
+        <div class="eyebrow"><span class="star-icon">✳</span> 無壓力嘅陪伴</div>
+        <h1>今日唔使<br><em>急住變好。</em></h1>
+        <p class="story-intro">想講嘢，我會聽。想出門，我哋行一小步。今日只想留喺度，<strong>一樣可以。</strong></p>
+        <div class="pet-stage">
+          <span class="stage-decoration deco-a">✳</span>
+          <span class="stage-decoration deco-b">✧</span>
+          <div class="pet-speech" id="petSpeech">Hi～ 我係爪爪！</div>
+          <div class="pet-svg-wrap" role="img" aria-label="微笑的綠色虛擬寵物爪爪">
+            <svg viewBox="0 0 310 286" width="270" height="255" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <ellipse cx="157" cy="268" rx="112" ry="13" fill="#a7cabe" opacity=".28"/>
+              <path d="M242 215 C285 184 290 236 267 240" fill="none" stroke="#80bca5" stroke-width="26" stroke-linecap="round"/>
+              <path d="M63 107 Q50 28 103 67 L129 100" fill="#b5e0cb" stroke="#5b9b82" stroke-width="6"/>
+              <path d="M246 108 Q263 29 208 67 L183 100" fill="#b5e0cb" stroke="#5b9b82" stroke-width="6"/>
+              <path d="M75 105 Q61 53 102 81 L121 106" fill="#f6c4bb" opacity=".8"/>
+              <path d="M230 105 Q245 53 207 81 L187 107" fill="#f6c4bb" opacity=".8"/>
+              <rect x="53" y="83" width="207" height="172" rx="85" fill="#b8e4d0" stroke="#5b9b82" stroke-width="6" />
+              <path d="M100 243 Q159 263 215 243" fill="none" stroke="#8bcaae" stroke-width="4" opacity=".7"/>
+              <ellipse cx="108" cy="175" rx="14" ry="18" fill="#2b4b44"/>
+              <ellipse cx="205" cy="175" rx="14" ry="18" fill="#2b4b44"/>
+              <circle cx="112" cy="169" r="4" fill="white"/>
+              <circle cx="209" cy="169" r="4" fill="white"/>
+              <ellipse cx="82" cy="200" rx="19" ry="10" fill="#eca79f" opacity=".7"/>
+              <ellipse cx="230" cy="200" rx="19" ry="10" fill="#eca79f" opacity=".7"/>
+              <path d="M147 196 Q157 211 168 196" stroke="#2b4b44" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <path d="M150 189 Q157 185 165 189 Q158 200 150 189" fill="#b06a70"/>
+              <ellipse cx="95" cy="247" rx="25" ry="13" fill="#98d4b8" stroke="#5b9b82" stroke-width="4"/>
+              <ellipse cx="217" cy="247" rx="25" ry="13" fill="#98d4b8" stroke="#5b9b82" stroke-width="4"/>
+              <path d="M147 112 Q157 102 169 112" fill="none" stroke="#8fd0b3" stroke-width="7" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="pet-name"><span>●</span> 爪爪 <small>你嘅 AI 虛擬寵物</small></div>
+        </div>
+        <div class="little-steps">
+          <div class="steps-heading"><span>☀</span><div><strong>今日嘅小小步</strong><small>全部自願，不設分數或懲罰</small></div></div>
+          <div class="step-buttons">
+            <button type="button" class="step" data-step="開窗透下氣">🍃 開窗透下氣</button>
+            <button type="button" class="step" data-step="飲杯水">💧 飲杯水</button>
+            <button type="button" class="step" data-step="日間安全地方散步">🌤 日間散步</button>
+          </div>
+          <div id="stepStatus" class="step-status" aria-live="polite">揀一件你願意嘗試嘅事，或者唔揀都得。</div>
+          <div class="step-actions">
+            <button type="button" id="doneStep" class="text-btn" disabled>模擬完成微行動 <span>↗</span></button>
+            <button type="button" id="skipStep" class="text-btn muted-btn">今日唔想出門</button>
+          </div>
+        </div>
+        <div class="pet-social">
+          <div><strong>🐾 由寵物先打招呼</strong><small>未來社交概念 · 目前純模擬，冇連接任何真人</small></div>
+          <button type="button" id="petHello" class="pet-hello-btn">試下模擬打招呼 →</button>
+          <p id="petHelloMessage" class="pet-hello-message" aria-live="polite" hidden></p>
+        </div>
+        <p class="footnote">✦ 呢度唔會存 GPS 定位，微行動只係模擬記錄。</p>
+      </section>
+
+      <section class="chat-panel" aria-label="同爪爪傾偈">
+        <div class="chat-header">
+          <div class="chat-person"><div class="chat-avatar" aria-hidden="true">🐾</div><div><strong>同爪爪傾偈</strong><small>溫柔陪伴 · 廣東話優先</small></div></div>
+          <button type="button" id="resetChat" class="icon-btn" title="清空本次對話" aria-label="清空本次對話">↻</button>
+        </div>
+        <div class="chat-notice"><span>♡</span><span>唔使交功課，亦冇標準答案。你可以照自己節奏講。</span></div>
+        <div class="chat-messages" id="messages" role="log" aria-live="polite" aria-relevant="additions">
+          <div class="message assistant"><div class="bubble">你好呀，我係爪爪！🍀 今日過得點呀？想講乜都可以，慢慢嚟。</div><small>爪爪</small></div>
+        </div>
+        <div id="crisisNotice" class="crisis-notice" hidden>
+          <strong>你唔需要自己面對</strong>
+          <span>香港：<a href="tel:23892222">撒瑪利亞會 2389 2222</a> · <a href="tel:23820000">生命熱線 2382 0000</a>。即時危險可打 <a href="tel:999">999</a>。</span>
+        </div>
+        <div class="chat-bottom">
+          <div class="suggestions" id="suggestions">
+            <button type="button" data-prompt="我今日有啲攰，想有人陪我傾下">今日有啲攰 🫧</button>
+            <button type="button" data-prompt="我叫阿明，你可以記住我嘅名字嗎？">記住我個名 ✨</button>
+            <button type="button" data-prompt="我今日唔想出門，但想繼續有人陪伴">唔想出門 🌿</button>
+          </div>
+          <form id="chatForm" class="composer">
+            <label for="userInput" class="sr-only">輸入你想同爪爪講嘅說話</label>
+            <textarea id="userInput" rows="1" maxlength="500" placeholder="想同爪爪講啲咩？" disabled></textarea>
+            <button type="submit" id="sendButton" aria-label="傳送訊息" disabled><span aria-hidden="true">➤</span></button>
+          </form>
+          <div class="composer-footer"><span id="connectionStatus">請先完成試玩確認</span><span>唔係醫療服務 · 如有緊急危險請尋求真人協助</span></div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>© MiraclePaw — 星爪內部概念測試</span><span>不設廣告 · 無監控定位 · 永不以拒絕任務懲罰</span></footer>
+  </div>
+
+  <div class="gate-backdrop" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="gate-card">
+      <div class="gate-symbol" aria-hidden="true">🐾</div>
+      <div class="eyebrow">MiraclePaw · 內部 AI Demo</div>
+      <h2 id="gateTitle">歡迎嚟試玩星爪</h2>
+      <p>呢個版本真係會連接 AI 模型，但仍屬早期開發，<strong>只供成年團隊成員及持份者測試</strong>，未獲批作未成年人正式情緒支援服務。</p>
+      <div class="gate-warning"><strong>開始前請知道</strong><span>你輸入嘅內容會透過 Netlify 後端傳送至 OpenAI API 產生回覆。請勿輸入真實學生資料、全名、電話、住址或其他敏感資訊。對話只喺目前網頁記憶，重新整理即清除。</span></div>
+      <form id="gateForm">
+        <label for="passcode">團隊試玩密碼</label>
+        <input id="passcode" type="password" autocomplete="off" spellcheck="false" placeholder="輸入部署時設定嘅密碼" required minlength="12" />
+        <label class="agreement"><input type="checkbox" id="agree" required /><span>我係成年人，明白呢個係未完成安全驗證嘅 Demo，並同意以非敏感測試內容體驗。</span></label>
+        <p id="gateError" class="gate-error" role="alert" hidden></p>
+        <button class="enter-btn" type="submit">開始同爪爪傾偈 <span>→</span></button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
