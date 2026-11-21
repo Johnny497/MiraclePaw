@@ -32,22 +32,25 @@
           <span class="stage-decoration deco-b">✧</span>
           <div class="pet-speech" id="petSpeech">Hi～ 我係爪爪！</div>
           <button type="button" class="pet-touch-zone" id="petTouch" aria-label="摸摸橘白小貓爪爪" title="摸摸爪爪個頭">
-            <span class="pet-picture" role="img" aria-label="橘白色大眼小貓，頸上繫住淺藍色三角頸巾"></span>
+            <picture class="pet-picture">
+              <source srcset="/miraclepaw-cat-cutout.avif" type="image/avif" />
+              <img src="/miraclepaw-cat.webp" width="640" height="585" alt="橘白色大眼小貓，戴住淺藍色三角頸巾" decoding="async" />
+            </picture>
             <span class="cat-sleep" aria-hidden="true">Zzz</span>
             <span class="cat-paw" aria-hidden="true">🐾</span>
             <span class="cat-fish" aria-hidden="true">🐟</span>
           </button>
           <div class="pet-hearts" id="petHearts" aria-hidden="true"></div>
           <div class="pet-name"><span>●</span> 爪爪 <small>你嘅 AI 虛擬寵物</small></div>
+          <div class="pet-controls" role="group" aria-label="爪爪互動動作">
+            <button type="button" data-pet-action="pet">🐾 摸摸頭</button>
+            <button type="button" data-pet-action="hug">🫶 抱一抱</button>
+            <button type="button" data-pet-action="feed">🐟 餵小食</button>
+            <button type="button" data-pet-action="wave">👋 打招呼</button>
+            <button type="button" data-pet-action="rest">🌙 休息下</button>
+          </div>
         </div>
         <p class="pet-action-status" id="petActionStatus" aria-live="polite">試下摸摸爪爪，佢會有反應㗎！</p>
-        <div class="pet-controls" role="group" aria-label="爪爪互動動作">
-          <button type="button" data-pet-action="pet">🐾 摸摸頭</button>
-          <button type="button" data-pet-action="hug">🫶 抱一抱</button>
-          <button type="button" data-pet-action="feed">🐟 餵小食</button>
-          <button type="button" data-pet-action="wave">👋 打招呼</button>
-          <button type="button" data-pet-action="rest">🌙 休息下</button>
-        </div>
         <p class="pet-care-note">所有互動都自願；冇飢餓值、親密度扣分，唔會因為冇照顧而失去陪伴。</p>
         <div class="little-steps">
           <div class="steps-heading"><span>☀</span><div><strong>今日嘅小小步</strong><small>全部自願，不設分數或懲罰</small></div></div>
