@@ -150,3 +150,51 @@
 .pet-touch-zone[data-mood="sleepy"] .cat-closed-eyes-layer { opacity:1;transition:opacity .3s ease; }
 @keyframes eyelid-overlay-blink { 0%,100%{opacity:0} 28%,70%{opacity:1} }
 @media(prefers-reduced-motion:reduce) { .pet-touch-zone.blink-now .cat-closed-eyes-layer{ animation:none!important; } .pet-touch-zone[data-animation="blink"] .cat-closed-eyes-layer{animation:none!important;opacity:1} }
+
+/* MiraclePaw v0.5 — voluntary, session-only mood check-in. */
+.mood-checkin {
+  margin-top: 18px;
+  border: 1px solid #dce8df;
+  border-radius: 22px;
+  background: linear-gradient(155deg, #fffefa 0%, #f2f9f2 100%);
+  padding: 20px;
+  box-shadow: 0 8px 23px rgba(63, 105, 77, .035);
+}
+.mood-checkin-header { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+.mood-kicker { color:#52836d; font-size:10px; font-weight:750; letter-spacing:1.1px; }
+.mood-checkin h2 { font-size:19px; line-height:1.35; letter-spacing:-.5px; margin:8px 0; }
+.mood-checkin-header p { color:#75897e; font-size:12px; line-height:1.8; margin:0 0 6px; }
+.mood-lock { display:grid; place-items:center; width:37px; height:37px; border-radius:13px; flex:0 0 auto; background:#e3f3e6; color:#579b7a; font-size:22px; }
+.mood-choices { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:16px 0 11px; }
+.mood-choices button {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  min-height:45px; padding:9px 7px;
+  border:1px solid #dce9dd; border-radius:13px;
+  background:#fffefa; color:#4d6f5b; font-size:12px;
+  transition:background .18s,border-color .18s,transform .18s;
+}
+.mood-choices button span { font-size:18px; }
+.mood-choices button:hover,.mood-choices button[aria-pressed="true"] { background:#e8f4e7; border-color:#89bca1; color:#286b53; }
+.mood-choices button:active { transform:scale(.985); }
+.mood-choices button:focus-visible,.mood-history-actions button:focus-visible { outline:2px solid #428e6a; outline-offset:3px; }
+.mood-feedback { min-height:38px; border-radius:12px; padding:10px 12px; line-height:1.65; color:#577d66; background:#edf5eb; font-size:12px; }
+.mood-history-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.mood-history-header strong { font-size:12px; }
+.mood-history-actions { display:flex; align-items:center; gap:13px; }
+.mood-history-actions .text-btn { font-size:11px; }
+.mood-history { margin:10px 0 0; padding:0; list-style:none; max-height:168px; overflow:auto; display:flex; flex-direction:column; gap:6px; }
+.mood-history:empty { display:none; }
+.mood-history li { display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid #e4ece1; border-radius:11px; padding:9px 12px; background:#fffefa; }
+.mood-history li strong { font-weight:650; font-size:12px; color:#4d6e5d; }
+.mood-history li time { font-size:11px; color:#809b8b; font-variant-numeric:tabular-nums; }
+.mood-empty { font-size:12px; color:#879b8b; margin:12px 0 0; line-height:1.7; }
+.mood-privacy { border-top:1px solid #e3eee2; font-size:10px; color:#85998b; line-height:1.75; padding-top:12px; margin:13px 0 0; }
+@media (max-width:560px) {
+  .mood-checkin { padding:16px 14px; }
+  .mood-choices { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .mood-history-header { align-items:flex-start; }
+  .mood-history-actions { gap:12px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .mood-choices button { transition:none; }
+}
