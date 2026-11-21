@@ -19,7 +19,7 @@
         <div class="brand-mark" aria-hidden="true">✿</div>
         <div><strong>星爪 <span>MiraclePaw</span></strong><small>陪你慢慢嚟。</small></div>
       </div>
-      <div class="header-label"><span class="status-dot"></span> 互動寵物試玩版（AI 回覆可能未連線） <span class="head-sep">·</span> 僅供成年持份者測試</div>
+      <div class="header-label"><span class="status-dot"></span> 互動寵物 v0.4（AI 回覆可能未連線） <span class="head-sep">·</span> 僅供成年持份者測試</div>
     </header>
 
     <main class="dashboard">
@@ -31,11 +31,16 @@
           <span class="stage-decoration deco-a">✳</span>
           <span class="stage-decoration deco-b">✧</span>
           <div class="pet-speech" id="petSpeech">Hi～ 我係爪爪！</div>
+          <div class="cat-mood-label" id="catMoodLabel" aria-live="polite">🐾 舒舒服服</div>
           <button type="button" class="pet-touch-zone" id="petTouch" aria-label="摸摸橘白小貓爪爪" title="摸摸爪爪個頭">
-            <picture class="pet-picture">
-              <source srcset="/miraclepaw-cat-cutout.avif" type="image/avif" />
-              <img src="/miraclepaw-cat.webp" width="640" height="585" alt="橘白色大眼小貓，戴住淺藍色三角頸巾" decoding="async" />
-            </picture>
+            <span class="cat-art" aria-hidden="true">
+              <img class="cat-tail-layer" src="/miraclepaw-cat-tail.webp" width="640" height="585" alt="" decoding="async" />
+              <img class="cat-body-layer" src="/miraclepaw-cat-body.webp" width="640" height="585" alt="" decoding="async" />
+              <img class="cat-closed-eyes-layer" src="/miraclepaw-cat-eyesclosed.webp" width="640" height="585" alt="" decoding="async" />
+              <span class="cat-cheek cat-cheek-left"></span>
+              <span class="cat-cheek cat-cheek-right"></span>
+              <span class="cat-face-symbol">♡</span>
+            </span>
             <span class="cat-sleep" aria-hidden="true">Zzz</span>
             <span class="cat-paw" aria-hidden="true">🐾</span>
             <span class="cat-fish" aria-hidden="true">🐟</span>
@@ -48,9 +53,16 @@
             <button type="button" data-pet-action="feed">🐟 餵小食</button>
             <button type="button" data-pet-action="wave">👋 打招呼</button>
             <button type="button" data-pet-action="rest">🌙 休息下</button>
+            <button type="button" data-pet-action="blink">👀 眨眨眼</button>
           </div>
         </div>
-        <p class="pet-action-status" id="petActionStatus" aria-live="polite">試下摸摸爪爪，佢會有反應㗎！</p>
+        <p class="pet-action-status" id="petActionStatus" aria-live="polite">試下摸摸爪爪；佢而家識眨眼同獨立搖尾啦！</p>
+        <div class="cat-moods" role="group" aria-label="選擇爪爪表情，不是心理健康評估">
+          <span>爪爪表情</span>
+          <button type="button" data-pet-mood="calm" aria-pressed="true">☺ 平靜</button>
+          <button type="button" data-pet-mood="happy" aria-pressed="false">♡ 開心</button>
+          <button type="button" data-pet-mood="sleepy" aria-pressed="false">☾ 想休息</button>
+        </div>
         <p class="pet-care-note">所有互動都自願；冇飢餓值、親密度扣分，唔會因為冇照顧而失去陪伴。</p>
         <div class="little-steps">
           <div class="steps-heading"><span>☀</span><div><strong>今日嘅小小步</strong><small>全部自願，不設分數或懲罰</small></div></div>
