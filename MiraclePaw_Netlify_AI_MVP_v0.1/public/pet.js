@@ -90,6 +90,15 @@
       status.textContent = '呢個只係寵物表情切換，唔係你嘅情緒評估。';
     })
   );
+  // A mood check-in only changes the pet's temporary expression.
+  // The person's selected feeling stays in mood.js page memory; it is never sent to the AI.
+  document.addEventListener('miraclepaw:mood-checkin', (event) => {
+    const petMood = event.detail?.petMood;
+    if (!['calm', 'happy', 'sleepy'].includes(petMood)) return;
+    window.clearTimeout(moodResetTimer);
+    setMood(petMood, true);
+    moodResetTimer = window.setTimeout(() => setMood('calm'), 3500);
+  });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) window.clearTimeout(blinkTimer);
     else scheduleBlink();
