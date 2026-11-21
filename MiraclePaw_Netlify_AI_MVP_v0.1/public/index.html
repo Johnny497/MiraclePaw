@@ -8,6 +8,7 @@
   <title>星爪 MiraclePaw｜一齊行一小步</title>
   <link rel="stylesheet" href="/styles.css" />
   <script src="/app.js" defer></script>
+  <script src="/pet.js" defer></script>
 </head>
 <body>
   <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -18,7 +19,7 @@
         <div class="brand-mark" aria-hidden="true">✿</div>
         <div><strong>星爪 <span>MiraclePaw</span></strong><small>陪你慢慢嚟。</small></div>
       </div>
-      <div class="header-label"><span class="status-dot"></span> AI 連線試玩版 <span class="head-sep">·</span> 僅供成年持份者測試</div>
+      <div class="header-label"><span class="status-dot"></span> 互動寵物試玩版（AI 回覆可能未連線） <span class="head-sep">·</span> 僅供成年持份者測試</div>
     </header>
 
     <main class="dashboard">
@@ -30,31 +31,24 @@
           <span class="stage-decoration deco-a">✳</span>
           <span class="stage-decoration deco-b">✧</span>
           <div class="pet-speech" id="petSpeech">Hi～ 我係爪爪！</div>
-          <div class="pet-svg-wrap" role="img" aria-label="微笑的綠色虛擬寵物爪爪">
-            <svg viewBox="0 0 310 286" width="270" height="255" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <ellipse cx="157" cy="268" rx="112" ry="13" fill="#a7cabe" opacity=".28"/>
-              <path d="M242 215 C285 184 290 236 267 240" fill="none" stroke="#80bca5" stroke-width="26" stroke-linecap="round"/>
-              <path d="M63 107 Q50 28 103 67 L129 100" fill="#b5e0cb" stroke="#5b9b82" stroke-width="6"/>
-              <path d="M246 108 Q263 29 208 67 L183 100" fill="#b5e0cb" stroke="#5b9b82" stroke-width="6"/>
-              <path d="M75 105 Q61 53 102 81 L121 106" fill="#f6c4bb" opacity=".8"/>
-              <path d="M230 105 Q245 53 207 81 L187 107" fill="#f6c4bb" opacity=".8"/>
-              <rect x="53" y="83" width="207" height="172" rx="85" fill="#b8e4d0" stroke="#5b9b82" stroke-width="6" />
-              <path d="M100 243 Q159 263 215 243" fill="none" stroke="#8bcaae" stroke-width="4" opacity=".7"/>
-              <ellipse cx="108" cy="175" rx="14" ry="18" fill="#2b4b44"/>
-              <ellipse cx="205" cy="175" rx="14" ry="18" fill="#2b4b44"/>
-              <circle cx="112" cy="169" r="4" fill="white"/>
-              <circle cx="209" cy="169" r="4" fill="white"/>
-              <ellipse cx="82" cy="200" rx="19" ry="10" fill="#eca79f" opacity=".7"/>
-              <ellipse cx="230" cy="200" rx="19" ry="10" fill="#eca79f" opacity=".7"/>
-              <path d="M147 196 Q157 211 168 196" stroke="#2b4b44" stroke-width="5" fill="none" stroke-linecap="round"/>
-              <path d="M150 189 Q157 185 165 189 Q158 200 150 189" fill="#b06a70"/>
-              <ellipse cx="95" cy="247" rx="25" ry="13" fill="#98d4b8" stroke="#5b9b82" stroke-width="4"/>
-              <ellipse cx="217" cy="247" rx="25" ry="13" fill="#98d4b8" stroke="#5b9b82" stroke-width="4"/>
-              <path d="M147 112 Q157 102 169 112" fill="none" stroke="#8fd0b3" stroke-width="7" stroke-linecap="round"/>
-            </svg>
-          </div>
+          <button type="button" class="pet-touch-zone" id="petTouch" aria-label="摸摸橘白小貓爪爪" title="摸摸爪爪個頭">
+            <span class="pet-picture" role="img" aria-label="橘白色大眼小貓，頸上繫住淺藍色三角頸巾"></span>
+            <span class="cat-sleep" aria-hidden="true">Zzz</span>
+            <span class="cat-paw" aria-hidden="true">🐾</span>
+            <span class="cat-fish" aria-hidden="true">🐟</span>
+          </button>
+          <div class="pet-hearts" id="petHearts" aria-hidden="true"></div>
           <div class="pet-name"><span>●</span> 爪爪 <small>你嘅 AI 虛擬寵物</small></div>
         </div>
+        <p class="pet-action-status" id="petActionStatus" aria-live="polite">試下摸摸爪爪，佢會有反應㗎！</p>
+        <div class="pet-controls" role="group" aria-label="爪爪互動動作">
+          <button type="button" data-pet-action="pet">🐾 摸摸頭</button>
+          <button type="button" data-pet-action="hug">🫶 抱一抱</button>
+          <button type="button" data-pet-action="feed">🐟 餵小食</button>
+          <button type="button" data-pet-action="wave">👋 打招呼</button>
+          <button type="button" data-pet-action="rest">🌙 休息下</button>
+        </div>
+        <p class="pet-care-note">所有互動都自願；冇飢餓值、親密度扣分，唔會因為冇照顧而失去陪伴。</p>
         <div class="little-steps">
           <div class="steps-heading"><span>☀</span><div><strong>今日嘅小小步</strong><small>全部自願，不設分數或懲罰</small></div></div>
           <div class="step-buttons">
@@ -78,7 +72,7 @@
 
       <section class="chat-panel" aria-label="同爪爪傾偈">
         <div class="chat-header">
-          <div class="chat-person"><div class="chat-avatar" aria-hidden="true">🐾</div><div><strong>同爪爪傾偈</strong><small>溫柔陪伴 · 廣東話優先</small></div></div>
+          <div class="chat-person"><div class="chat-avatar" aria-hidden="true">🐱</div><div><strong>同爪爪傾偈</strong><small>溫柔陪伴 · 廣東話優先</small></div></div>
           <button type="button" id="resetChat" class="icon-btn" title="清空本次對話" aria-label="清空本次對話">↻</button>
         </div>
         <div class="chat-notice"><span>♡</span><span>唔使交功課，亦冇標準答案。你可以照自己節奏講。</span></div>
@@ -112,7 +106,7 @@
       <div class="gate-symbol" aria-hidden="true">🐾</div>
       <div class="eyebrow">MiraclePaw · 內部 AI Demo</div>
       <h2 id="gateTitle">歡迎嚟試玩星爪</h2>
-      <p>呢個版本真係會連接 AI 模型，但仍屬早期開發，<strong>只供成年團隊成員及持份者測試</strong>，未獲批作未成年人正式情緒支援服務。</p>
+      <p>呢個版本有本地寵物互動動畫，AI 對話需要另行連線，仍屬早期開發，<strong>只供成年團隊成員及持份者測試</strong>，未獲批作未成年人正式情緒支援服務。</p>
       <div class="gate-warning"><strong>開始前請知道</strong><span>你輸入嘅內容會透過 Netlify 後端傳送至 OpenAI API 產生回覆。請勿輸入真實學生資料、全名、電話、住址或其他敏感資訊。對話只喺目前網頁記憶，重新整理即清除。</span></div>
       <form id="gateForm">
         <label for="passcode">團隊試玩密碼</label>
