@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/styles.css" />
   <script src="/app.js" defer></script>
   <script src="/pet.js" defer></script>
+  <script src="/mood.js" defer></script>
 </head>
 <body>
   <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -19,7 +20,7 @@
         <div class="brand-mark" aria-hidden="true">✿</div>
         <div><strong>星爪 <span>MiraclePaw</span></strong><small>陪你慢慢嚟。</small></div>
       </div>
-      <div class="header-label"><span class="status-dot"></span> 互動寵物 v0.4（AI 回覆可能未連線） <span class="head-sep">·</span> 僅供成年持份者測試</div>
+      <div class="header-label"><span class="status-dot"></span> 互動寵物 v0.5（情緒記錄只限本頁） <span class="head-sep">·</span> 僅供成年持份者測試</div>
     </header>
 
     <main class="dashboard">
@@ -64,6 +65,34 @@
           <button type="button" data-pet-mood="sleepy" aria-pressed="false">☾ 想休息</button>
         </div>
         <p class="pet-care-note">所有互動都自願；冇飢餓值、親密度扣分，唔會因為冇照顧而失去陪伴。</p>
+        <section class="mood-checkin" id="moodCheckin" aria-labelledby="moodCheckinTitle">
+          <div class="mood-checkin-header">
+            <div>
+              <span class="mood-kicker">♡ 自願心情記錄 · 非心理測驗</span>
+              <h2 id="moodCheckinTitle">你而家心情點呀？</h2>
+              <p>唔一定要記錄，唔想講亦冇關係。揀一個最貼近而家感受嘅選項就得。</p>
+            </div>
+            <span class="mood-lock" aria-hidden="true">☁</span>
+          </div>
+          <div class="mood-choices" role="group" aria-label="揀選今次感受，並記錄喺本次試玩">
+            <button type="button" data-feeling="happy" aria-label="記錄開心心情"><span aria-hidden="true">😊</span> 開心</button>
+            <button type="button" data-feeling="calm" aria-label="記錄平靜心情"><span aria-hidden="true">😌</span> 平靜</button>
+            <button type="button" data-feeling="worried" aria-label="記錄有啲擔心心情"><span aria-hidden="true">😟</span> 有啲擔心</button>
+            <button type="button" data-feeling="low" aria-label="記錄有啲低落心情"><span aria-hidden="true">😔</span> 有啲低落</button>
+            <button type="button" data-feeling="tired" aria-label="記錄攰攰哋心情"><span aria-hidden="true">🥱</span> 攰攰哋</button>
+          </div>
+          <div class="mood-feedback" id="moodFeedback" role="status" aria-live="polite">記錄只會留喺呢個網頁嘅記憶中，重新整理即清除。</div>
+          <div class="mood-history-header">
+            <strong>本次試玩嘅心情足跡</strong>
+            <div class="mood-history-actions">
+              <button type="button" id="moodSkip" class="text-btn muted-btn">今日唔想記錄</button>
+              <button type="button" id="moodClear" class="text-btn" disabled>清除記錄</button>
+            </div>
+          </div>
+          <ol id="moodHistory" class="mood-history" aria-label="本次試玩嘅心情記錄"></ol>
+          <p id="moodEmpty" class="mood-empty">暫時未有記錄。記錄與否，都唔影響爪爪陪你。</p>
+          <p class="mood-privacy">呢個只係成年人內部 Demo，唔係心理診斷或健康分數；唔會傳去 AI、Netlify Functions、資料庫或 GPS。最多只顯示本頁最近 10 次自願記錄。</p>
+        </section>
         <div class="little-steps">
           <div class="steps-heading"><span>☀</span><div><strong>今日嘅小小步</strong><small>全部自願，不設分數或懲罰</small></div></div>
           <div class="step-buttons">
@@ -122,7 +151,7 @@
       <div class="eyebrow">MiraclePaw · 內部 AI Demo</div>
       <h2 id="gateTitle">歡迎嚟試玩星爪</h2>
       <p>呢個版本有本地寵物互動動畫，AI 對話需要另行連線，仍屬早期開發，<strong>只供成年團隊成員及持份者測試</strong>，未獲批作未成年人正式情緒支援服務。</p>
-      <div class="gate-warning"><strong>開始前請知道</strong><span>你輸入嘅內容會透過 Netlify 後端傳送至 OpenAI API 產生回覆。請勿輸入真實學生資料、全名、電話、住址或其他敏感資訊。對話只喺目前網頁記憶，重新整理即清除。</span></div>
+      <div class="gate-warning"><strong>開始前請知道</strong><span>你輸入嘅內容會透過 Netlify 後端傳送至 OpenAI API 產生回覆。請勿輸入真實學生資料、全名、電話、住址或其他敏感資訊。對話只喺目前網頁記憶，重新整理即清除。自願心情記錄亦只喺本頁暫存，唔會傳送去 AI API。</span></div>
       <form id="gateForm">
         <label for="passcode">團隊試玩密碼</label>
         <input id="passcode" type="password" autocomplete="off" spellcheck="false" placeholder="輸入部署時設定嘅密碼" required minlength="12" />
