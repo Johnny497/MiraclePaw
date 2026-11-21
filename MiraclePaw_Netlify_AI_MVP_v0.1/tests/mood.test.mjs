@@ -102,7 +102,8 @@ test('confirmed deletion removes all records, and log is limited to 10', () => {
 });
 
 test('mood selection never sends network requests or persists to storage', () => {
-  assert.doesNotMatch(moodJs, /\bfetch\s*\(|XMLHttpRequest|sendBeacon|localStorage|sessionStorage|indexedDB|document\.cookie/);
+  const executable = moodJs.replace(/\/\/[^\n]*/g, '');
+  assert.doesNotMatch(executable, /\bfetch\s*\(|XMLHttpRequest|sendBeacon|localStorage|sessionStorage|indexedDB|document\.cookie/);
   assert.match(catJs, /miraclepaw:mood-checkin/);
   assert.match(html, /冇飢餓值、親密度扣分/);
 });
