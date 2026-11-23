@@ -86,6 +86,31 @@ function simulatePitch() {
   };
 }
 
+test('Netlify Deploy Preview hides external Drawer without modifying production, permission gate or routes', () => {
+  const script = html.match(/<script id="previewDrawerFix">([\\s\\S]*?)<\\/script>/)?.[1];
+  assert.ok(script, 'Missing preview-only Drawer guard');
+  function run(hostname, search = '', hash = '') {
+    const redirects = [];
+    vm.runInNewContext(script, {
+      location: {
+        hostname, search, hash, pathname: '/pitch.html',
+        replace: path => redirects.push(path)
+      },
+      URLSearchParams
+    });
+    return redirects;
+  }
+  assert.deepEqual(run('deploy-preview-8--magenta-churros-99ffc3.netlify.app'),
+    ['/pitch.html?ntl-drawer-state=hidden']);
+  assert.deepEqual(run('deploy-preview-8--magenta-churros-99ffc3.netlify.app', '?utm_source=chatgpt.com', '#pitchDeck'),
+    ['/pitch.html?utm_source=chatgpt.com&ntl-drawer-state=hidden#pitchDeck']);
+  assert.deepEqual(run('deploy-preview-8--magenta-churros-99ffc3.netlify.app', '?ntl-drawer-state=hidden'), []);
+  assert.deepEqual(run('deploy-preview-8--magenta-churros-99ffc3.netlify.app', '?ntl-drawer-state=visible'), []);
+  assert.deepEqual(run('magenta-churros-99ffc3.netlify.app'), []);
+  assert.deepEqual(run('example.org'), []);
+  assert.match(html, /id="pitchGate" role="dialog" aria-modal="true"/);
+});
+
 test('two pitch routes have five honest timed segments totalling 180 seconds', () => {
   assert.equal(TOTAL_SECONDS, 180);
   assert.deepEqual(Object.keys(PITCH_ROUTES), ['hksec', 'ngo']);
