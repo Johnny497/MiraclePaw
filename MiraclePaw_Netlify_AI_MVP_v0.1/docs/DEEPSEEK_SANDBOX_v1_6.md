@@ -8,7 +8,7 @@ This branch starts from the unmerged v1.5 PR #14 branch. Do not merge into main 
 - Requires separate `DEEPSEEK_TEST_PASSCODE` (20+ chars), `DEEPSEEK_API_KEY`, and `OPENAI_API_KEY` for independent input moderation. No OpenAI key means **fail closed**, not an unsafe bypass.
 - Requests are restricted to a single fictional test message; no history, storage, tracking, or retries. Do not submit real personal or sensitive information.
 - DeepSeek model: `deepseek-chat`; max 250 output tokens. Rate limit configured to 3 requests/60 seconds per IP+domain; verify actual Netlify deploy logs. **Not a global budget cap.**
-- The output is only checked against basic crisis keywords; independent **output** moderation and expert safety testing are still outstanding. This is **not ready for real users**.
+- Input and output are independently checked via OpenAI Moderation; output is never displayed if moderation fails, returns invalid data, or flags content. Expert safety testing, provider data review and cost controls remain outstanding. This is **not ready for real users**.
 
 ## Configuration (Netlify Deploy Preview only)
 1. Add secret values via Netlify environment variable UI, scoped to a dedicated Deploy Preview context if supported. Never put keys in GitHub, chat, screenshots or frontend.
