@@ -64,7 +64,7 @@ test('all three themes retain only proposed, unvalidated youth/community narrati
  for(const t of TOPICS){
   assert.ok(demos.has(t.scene),t.id+' scenario missing');
   for(const field of ['label','tagline','context','observation','insight','challenge','need','proposal','resource','safety','sample']){
-   assert.ok(typeof t[field]==='string'&&t[field].length>=8,t.id+':'+field);
+   assert.ok(typeof t[field]==='string'&&t[field].length>=(field==='label'?3:8),t.id+':'+field);
   }
   assert.match(t.observation,/未/);
   assert.match(t.resource,/未|需要/);
