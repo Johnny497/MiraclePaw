@@ -13,6 +13,10 @@ for (const id of requiredIds) {
 }
 
 const scenarioById = new Map(DEMO_SCENARIOS.map((scenario) => [scenario.id, scenario]));
+const requestedScenarioId = new URLSearchParams(window.location.search).get('scene');
+// The query parameter is only a fixed scenario identifier, never personal information.
+const initialScenarioId = scenarioById.has(requestedScenarioId)
+  ? requestedScenarioId : DEMO_SCENARIOS[0].id;
 const navButtons = [...document.querySelectorAll('[data-scenario]')];
 const transcript = $('demoTranscript');
 const choices = $('demoChoices');
@@ -121,5 +125,5 @@ $('demoStart').addEventListener('click', () => {
   if (!$('demoAdultAgree').checked) return;
   $('demoGate').hidden = true;
   $('demoExperience').hidden = false;
-  openScenario(DEMO_SCENARIOS[0].id, true);
+  openScenario(initialScenarioId, true);
 });
