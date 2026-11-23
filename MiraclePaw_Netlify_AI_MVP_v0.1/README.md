@@ -1,8 +1,18 @@
-# 星爪 MiraclePaw — Netlify Web App（內部 MVP v0.8）
+# 星爪 MiraclePaw — Netlify Web App（內部 MVP v0.9）
 
 > **用途：** 內部團隊及**成年** NGO／社工持份者試玩展示，並非已完成安全驗證的未成年人產品；不能用於緊急求助、醫療診斷或治療。
 
 這份專案由零建立，採用 **純 HTML / CSS / JavaScript + Netlify Functions + OpenAI Responses API**，不需要資料庫，也不必預先安裝 React。
+
+## v0.9 — NGO／HKSEC Pitch Ready（成年持份者演示）
+
+- **新入口**：`/pitch.html`，由主頁、v0.7 展示導覽、v0.8 FAQ／驗收頁進入。
+- **雙路線三分鐘 Pitch**：HKSEC 與 NGO／社工，均為五段、建議合計 180 秒的廣東話講稿。可跳段、切換路線、手動開始／暫停／重設計時；不會自動跳段，背景頁面會暫停計時。
+- **NGO 試點討論框架**：成年專業人士檢視 → 倫理／安全及資料治理方案 → 僅在審核批准後考慮小規模試點。現階段**未有 NGO 合作協議、倫理批准、未成年服務試用或研究成效**。
+- **建議指標**：拒絕任務嘅可理解度、危機資訊清晰度、資料流向與第三方權限、未來獲批研究才收集嘅自願舒適度。呢啲都**唔係現有實測結果**，亦唔係臨床療效證明。
+- **現場備援**：提供固定劇本、危機劇本及 QA 快速連結；固定劇本互動無需 AI API，但首次載入網站仍可能需要網絡。所有固定劇本仍有成年人確認入口。
+- **私隱**：Pitch 本身只係靜態講稿同計時器，唔傳資料、唔儲存觀眾資訊、唔定位、唔收集真實個案。成年人勾選不等於身份核實；不得將原型作正式危機支援或學生服務。
+- 本版僅限展示頁及文件，**沒有更改主網站 AI、Netlify Functions、危機熱線內容或收費／Billing**。合併前須先運行 `npm test`，以及實際在桌面及手機 Preview 驗收。
 
 ## v0.8 — NGO／HKSEC 展示驗收與常見問題
 
@@ -147,4 +157,4 @@ MiraclePaw_Netlify_AI_MVP/
 - OpenAI Responses API: https://developers.openai.com/api/reference/resources/responses/methods/create
 - OpenAI Moderation: https://developers.openai.com/api/docs/guides/moderation
 
-版本：內部 MVP v0.7（2026-11-23）。原型已透過 GitHub/Netlify 建立部署流程；固定劇本及展示導覽唔需要 OpenAI API。**AI 真正對話仍須另外驗證 API 額度與安全性；唔係已驗證的未成年人或臨床服務。**
+版本：內部 MVP v0.9（2026-11-23）。原型已透過 GitHub/Netlify 建立部署流程；固定劇本及展示導覽唔需要 OpenAI API。**AI 真正對話仍須另外驗證 API 額度與安全性；唔係已驗證的未成年人或臨床服務。**
