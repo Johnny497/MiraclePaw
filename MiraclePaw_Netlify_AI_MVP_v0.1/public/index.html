@@ -10,6 +10,7 @@
   <script src="/app.js" defer></script>
   <script src="/pet.js" defer></script>
   <script src="/mood.js" defer></script>
+  <script src="/tour.js" defer></script>
 </head>
 <body>
   <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -20,7 +21,7 @@
         <div class="brand-mark" aria-hidden="true">✿</div>
         <div><strong>星爪 <span>MiraclePaw</span></strong><small>陪你慢慢嚟。</small></div>
       </div>
-      <div class="header-label"><span class="status-dot"></span> 互動寵物 v1.4（AI 使用限流與成本防護） <span class="head-sep">·</span> 僅供成年持份者測試</div>
+      <div class="header-label"><span class="status-dot"></span> 互動寵物 v1.5（免費本地陪伴導覽） <span class="head-sep">·</span> 僅供成年持份者測試</div>
     </header>
 
     <main class="dashboard">
@@ -28,6 +29,17 @@
         <div class="eyebrow"><span class="star-icon">✳</span> 無壓力嘅陪伴</div>
         <h1>今日唔使<br><em>急住變好。</em></h1>
         <p class="story-intro">想講嘢，我會聽。想出門，我哋行一小步。今日只想留喺度，<strong>一樣可以。</strong></p>
+        <section class="tour-panel" aria-labelledby="tourTitle">
+          <span class="tour-kicker">🐾 v1.5 · 免費本地互動導覽</span>
+          <h2 id="tourTitle">四段陪伴小旅程</h2>
+          <p id="tourStatus" role="status" aria-live="polite">可以由摸摸爪爪開始，之後體驗心情分享、自願微步，同虛構寵物打招呼。每段都可以略過。</p>
+          <div class="tour-actions">
+            <button type="button" id="tourStart" class="tour-primary">開始自由導覽</button>
+            <button type="button" id="tourNext" class="tour-primary" hidden>下一段（可略過）</button>
+            <button type="button" id="tourStop" class="tour-secondary" hidden>結束導覽</button>
+          </div>
+          <p class="tour-note">純本頁引導 · 不需 AI 密碼、不扣分、不保存導覽進度；不會自動觸發任何互動或上傳資料。</p>
+        </section>
         <a class="offline-demo-link showcase-entry" href="/activity.html">🧩 v1.2 NGO 青年活動構想 <span>社區 · 技能 · 健康 · 八頁大綱 →</span></a>
         <a class="offline-demo-link showcase-entry" href="/partners.html">🤝 v1.1 NGO 合作邀請工具包 <span>中英文邀請 · 一頁簡介 · 會議準備 →</span></a>
         <a class="offline-demo-link showcase-entry" href="/pilot.html">🛡️ v1.0 NGO 試點準備包 <span>風險 · 私隱 · 專業審查 →</span></a>
@@ -100,7 +112,7 @@
           <p id="moodEmpty" class="mood-empty">暫時未有記錄。記錄與否，都唔影響爪爪陪你。</p>
           <p class="mood-privacy">呢個只係成年人內部 Demo，唔係心理診斷或健康分數；唔會傳去 AI、Netlify Functions、資料庫或 GPS。最多只顯示本頁最近 10 次自願記錄。</p>
         </section>
-        <div class="little-steps">
+        <div class="little-steps" id="littleSteps" tabindex="-1">
           <div class="steps-heading"><span>☀</span><div><strong>今日嘅小小步</strong><small>全部自願，不設分數或懲罰</small></div></div>
           <div class="step-buttons">
             <button type="button" class="step" data-step="開窗透下氣">🍃 開窗透下氣</button>
@@ -113,7 +125,7 @@
             <button type="button" id="skipStep" class="text-btn muted-btn">今日唔想出門</button>
           </div>
         </div>
-        <div class="pet-social">
+        <div class="pet-social" id="petSocial">
           <div><strong>🐾 由寵物先打招呼</strong><small>未來社交概念 · 目前純模擬，冇連接任何真人</small></div>
           <button type="button" id="petHello" class="pet-hello-btn">試下模擬打招呼 →</button>
           <p id="petHelloMessage" class="pet-hello-message" aria-live="polite" hidden></p>
@@ -142,7 +154,7 @@
           <div class="suggestions" id="suggestions">
             <button type="button" data-prompt="我今日有啲攰，想有人陪我傾下">今日有啲攰 🫧</button>
             <button type="button" data-prompt="我叫阿明，你可以記住我嘅名字嗎？">記住我個名 ✨</button>
-            <button type="button" data-prompt="我今日唔想出門，但想繼續有人陪伴">唔想出門 🌿</button>
+            <button type="button" data-local-companion="rest">唔想出門 🌿（本地回應）</button>
           </div>
           <form id="chatForm" class="composer">
             <label for="userInput" class="sr-only">輸入你想同爪爪講嘅說話</label>
@@ -173,6 +185,8 @@
         <p id="gateError" class="gate-error" role="alert" hidden></p>
         <button class="enter-btn" type="submit">開始同爪爪傾偈 <span>→</span></button>
       </form>
+      <button type="button" id="localEntry" class="local-entry">唔連 AI，先體驗免費陪伴 🐾</button>
+      <p class="local-entry-note">請先勾選成年內部測試確認。此模式無需試玩密碼，AI 對話保持關閉；寵物、心情、微步同導覽照常可用。</p>
     </div>
   </div>
 </body>
