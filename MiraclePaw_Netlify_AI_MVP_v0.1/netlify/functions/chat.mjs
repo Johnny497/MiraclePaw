@@ -9,6 +9,15 @@ const KEYWORDS = [
 ];
 const MAX_BODY_BYTES = 30000;
 
+// Intentionally non-retrying upstream calls. 429/timeout failures are reported
+// without exposing OpenAI response bodies, credentials or account details.
+class UpstreamFailure extends Error {
+  constructor(kind) {
+    super(kind);
+    this.kind = kind;
+  }
+}
+
 const INSTRUCTIONS = `你係「爪爪」，星爪 MiraclePaw 嘅溫柔虛擬寵物。目標對象係正在進行產品內部測試嘅成年人，並非已獲准讓未成年人自行使用嘅服務。
 用自然、簡潔、口語嘅香港廣東話及繁體中文回應，通常兩至四句，約 30 至 90 字。先理解感受，再問一個唔催促嘅小問題；唔好一味追問。
 若對方講咗名字或心情，使用本次對話上下文記住，但唔好假裝跨裝置或重開網頁仍能記得。你係 AI 虛擬寵物，唔係真人、社工、醫生或治療師；唔作診斷、唔保證醫療效果。
@@ -52,10 +61,14 @@ async function openai(path, body, key) {
       signal: controller.signal,
     });
     if (!response.ok) {
-      // Do not leak upstream response bodies or secrets to the browser.
-      throw new Error(`OpenAI request failed with HTTP ${response.status}`);
+      // Never forward upstream response bodies or secret/account identifiers.
+      if (response.status === 429) throw new UpstreamFailure('LIMIT');
+      throw new UpstreamFailure('UNAVAILABLE');
     }
     return await response.json();
+  } catch (error) {
+    if (error?.name === 'AbortError') throw new UpstreamFailure('TIMEOUT');
+    throw error;
   } finally {
     clearTimeout(timeout);
   }
@@ -142,11 +155,20 @@ export default async function handler(request) {
     }, key);
     const reply = extractText(response);
     if (!reply) throw new Error('Empty model response');
-    // Defense in depth: crisis references in the output are not actionable commands.
+    // Conservative output keyword check; NOT a comprehensive or clinical safety test.
+    if (looksLikeCrisis(reply)) return json({ reply: crisisReply, crisis: true });
     return json({ reply: reply.slice(0, 1600), crisis: false });
   } catch (error) {
-    console.error('MiraclePaw AI request failed:', error instanceof Error ? error.message : 'unknown');
-    return json({ error: `AI 暫時未能回覆，安全檢查或模型服務可能未就緒。你可以稍後再試。緊急支援：${HOTLINES}。` }, 502);
+    // No raw user text, conversation history, API keys or upstream bodies in logs.
+    const kind = error instanceof UpstreamFailure ? error.kind : 'UNAVAILABLE';
+    console.error('MiraclePaw AI upstream failure class:', kind);
+    if (kind === 'LIMIT') {
+      return json({ code: 'AI_LIMIT', error: 'AI 服務暫時達到使用限制。唔使重複傳送；你仍然可以開啟免費固定劇本，爪爪嘅基本陪伴唔會消失。' }, 503);
+    }
+    if (kind === 'TIMEOUT') {
+      return json({ code: 'AI_TIMEOUT', error: 'AI 回應超時。今次訊息未能確認完成，請勿連續重試；可以先用固定劇本。' }, 504);
+    }
+    return json({ code: 'AI_UNAVAILABLE', error: `AI 暫時未能回覆，安全檢查或模型服務可能未就緒。你可以先用固定劇本。緊急支援：${HOTLINES}。` }, 502);
   }
 }
 
