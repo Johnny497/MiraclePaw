@@ -87,7 +87,7 @@ function simulatePitch() {
 }
 
 test('Netlify Deploy Preview hides external Drawer without modifying production, permission gate or routes', () => {
-  const script = html.match(/<script id="previewDrawerFix">([\\s\\S]*?)<\\/script>/)?.[1];
+  const script = html.split('<script id="previewDrawerFix">')[1]?.split('</script>')[0];
   assert.ok(script, 'Missing preview-only Drawer guard');
   function run(hostname, search = '', hash = '') {
     const redirects = [];
