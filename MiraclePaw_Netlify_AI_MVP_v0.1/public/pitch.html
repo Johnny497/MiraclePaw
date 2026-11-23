@@ -7,6 +7,18 @@
   <meta name="description" content="MiraclePaw 星爪 v0.9 NGO／HKSEC 成年持份者 3 分鐘 Pitch Mode、建議試點及成效指標；全部為概念示範，並非已驗證結果。" />
   <title>星爪 MiraclePaw｜v0.9 NGO／HKSEC Pitch Mode</title>
   <link rel="stylesheet" href="/pitch.css" />
+  <!-- Netlify adds a reviewer Drawer to Deploy Preview pages. It may obscure the
+       presentation on some browsers. Netlify officially supports hiding it with
+       ntl-drawer-state=hidden. Only redirect in preview, never in production. -->
+  <script id="previewDrawerFix">
+    if (/^deploy-preview-\d+--[a-z0-9-]+\.netlify\.app$/i.test(location.hostname)) {
+      const query = new URLSearchParams(location.search);
+      if (!query.has('ntl-drawer-state')) {
+        query.set('ntl-drawer-state', 'hidden');
+        location.replace(location.pathname + '?' + query.toString() + location.hash);
+      }
+    }
+  </script>
   <script type="module" src="/pitch.js"></script>
 </head>
 <body>
