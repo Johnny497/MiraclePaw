@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f7f8ef" />
+  <meta name="description" content="MiraclePaw 星爪 v0.8 成年持份者展示驗收與 NGO／HKSEC 常見問題，供演示團隊內部使用。" />
+  <title>星爪 MiraclePaw｜v0.8 展示驗收及評審問答</title>
+  <link rel="stylesheet" href="/review.css" />
+  <script type="module" src="/review.js"></script>
+</head>
+<body>
+  <div class="review-shell">
+    <header class="review-header">
+      <a href="/" class="brand"><span aria-hidden="true">🐾</span><strong>星爪 <em>MiraclePaw</em></strong></a>
+      <nav aria-label="展示資源導覽">
+        <a href="/showcase.html">評審展示</a>
+        <a href="/demo.html">固定劇本</a>
+        <a href="/">主網站</a>
+      </nav>
+    </header>
+    <main id="reviewMain" hidden>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">✳ MIRACLEPAW · V0.8 · PRESENTER QUALITY CHECK</p>
+          <h1>每次向評審展示之前，<em>先核對清楚。</em></h1>
+          <p>HKSEC／NGO 團隊內部用嘅展示驗收、常見問題及討論提綱。呢度嘅核對係<strong>演示準備</strong>，唔係用戶表現評分、專業安全認證，亦唔會證明產品已有效改善心理健康。</p>
+          <div class="hero-links">
+            <a class="primary" href="/showcase.html">開啟兩條展示導覽 →</a>
+            <a href="/demo.html">查看五個固定劇本 →</a>
+          </div>
+        </div>
+        <div class="cat-visual" aria-label="爪爪橘白小貓"><img src="/miraclepaw-cat-tail.webp" alt="" width="640" height="585" /><img src="/miraclepaw-cat-body.webp" alt="橘白色小貓，戴淺藍色頸巾" width="640" height="585" /></div>
+      </section>
+
+      <div class="truth-strip" aria-label="現有成果和未驗證事項">
+        <div><span class="status-done">目前可展示</span><strong>寵物原型與自願心情功能</strong><p>功能存在，唔代表健康成效</p></div>
+        <div><span class="status-done">目前可展示</span><strong>五個虛構分支劇本</strong><p>固定台詞，唔係真實 AI</p></div>
+        <div><span class="status-pending">仍待驗證</span><strong>正式危機安全、NGO 試點與成效</strong><p>唔好當成已獲認證或合作</p></div>
+      </div>
+
+      <section class="review-section" aria-labelledby="checkTitle">
+        <div class="section-heading">
+          <div><p class="eyebrow">PRE-DEMO CHECK</p><h2 id="checkTitle">展示前手動驗收清單</h2><p>逐項親自試完先剔選；未核實就保持未剔。剔選只留喺本次網頁，重新整理即清除，唔會上傳。</p></div>
+          <div class="review-actions">
+            <button type="button" id="resetReview">重設剔選</button>
+            <button type="button" id="printReview" class="dark-button">列印／另存清單</button>
+          </div>
+        </div>
+        <div class="review-progress" role="status" aria-live="polite">
+          <strong id="checkProgress">已核對 0／10 項</strong>
+          <span>只供內部手動記錄，不代表產品已完成安全審批</span>
+        </div>
+        <div id="reviewItems" class="review-items"></div>
+        <p class="small-note">提示：不要用真實學生資料、私人聊天內容或真實危機去做展示驗收。正式服務仍需要專業、安全、倫理與私隱審核。</p>
+      </section>
+
+      <section class="review-section" aria-labelledby="faqTitle">
+        <div class="section-heading">
+          <div><p class="eyebrow">QUESTION PREPARATION</p><h2 id="faqTitle">HKSEC／NGO 常見問題</h2><p>以下係適合示範時使用嘅建議答法，唔係已經由評審提出嘅真實問題。</p></div>
+        </div>
+        <div id="faqItems" class="faq-list"></div>
+      </section>
+
+      <section class="review-section discussion" aria-labelledby="feedbackTitle">
+        <div class="section-heading">
+          <div><p class="eyebrow">NGO / PROFESSIONAL FEEDBACK</p><h2 id="feedbackTitle">與持份者討論嘅四個問題</h2><p>只提供現場討論提示，<strong>本網站唔收集或儲存任何意見</strong>。正式研究或訪談要另外取得同意及審批。</p></div>
+        </div>
+        <ol id="discussionPrompts" class="discussion-prompts"></ol>
+        <div class="discussion-footer"><a href="/showcase.html">返回 NGO／HKSEC 導覽 →</a><span>安全聲明：只供獲邀成年人概念評估，非心理治療或真實危機應對工具。</span></div>
+      </section>
+      <footer class="review-footer">MiraclePaw · v0.8 內部驗收 · 不儲存剔選或個人資料 · 不設真實服務成效聲稱</footer>
+    </main>
+
+    <div class="age-gate" id="reviewGate" role="dialog" aria-modal="true" aria-labelledby="reviewGateTitle">
+      <div class="age-card">
+        <div class="age-icon" aria-hidden="true">🐱</div>
+        <p class="eyebrow">MIRACLEPAW · INTERNAL PRESENTER GUIDE</p>
+        <h2 id="reviewGateTitle">展示前，我哋先檢查清楚</h2>
+        <p>呢個係 NGO／HKSEC 成年持份者內部驗收工具，唔係正式安全認證。FAQ 同驗收項目全部係固定內容；唔使用 AI、唔儲存你嘅剔選。</p>
+        <p class="gate-alert">限成年團隊及獲邀持份者評估；不可作未成年人士正式服務、臨床診斷或危機求助。勾選聲明並唔等於正式年齡核實。</p>
+        <label class="agreement"><input type="checkbox" id="reviewAdult" /><span>我係成年人，明白此頁只作內部展示驗收，唔會用真實敏感資料測試。</span></label>
+        <button type="button" id="enterReview" disabled>開始檢查 <span aria-hidden="true">→</span></button>
+        <a href="/showcase.html" class="back">返回展示導覽</a>
+      </div>
+    </div>
+    <noscript><p class="noscript">此頁需要啟用 JavaScript，但唔需要連接 AI API。</p></noscript>
+  </div>
+</body>
+</html>
