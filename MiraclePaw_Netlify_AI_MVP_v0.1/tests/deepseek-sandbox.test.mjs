@@ -31,3 +31,11 @@ test('disabled sandbox does not contact a provider', async () => {
     else process.env.DEEPSEEK_TEST_ENABLED = prior;
   }
 });
+
+
+test('model output must pass independent moderation before returning', () => {
+  assert.match(source, /await moderate\(message, moderationKey\)/);
+  assert.match(source, /await moderate\(output, moderationKey\)/);
+  assert.match(source, /const safeFallback/);
+  assert.match(source, /if \(crisis\.test\(output\) \|\| await moderate\(output, moderationKey\)\)/);
+});
