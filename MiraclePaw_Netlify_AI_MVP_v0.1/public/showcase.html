@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f6f8ef" />
+  <meta name="description" content="MiraclePaw 星爪 v0.7 HKSEC／NGO 評審展示導覽：產品原則、已做原型、風險邊界與未來試點。" />
+  <title>星爪 MiraclePaw｜NGO／HKSEC 展示導覽</title>
+  <link rel="stylesheet" href="/showcase.css" />
+  <script type="module" src="/showcase.js"></script>
+</head>
+<body>
+  <div class="showcase-shell">
+    <header class="showcase-header">
+      <a href="/" class="brand" aria-label="返回 MiraclePaw 主網站">
+        <span class="brand-symbol" aria-hidden="true">🐾</span>
+        <span><strong>星爪 <span>MiraclePaw</span></strong><small>陪你慢慢嚟。</small></span>
+      </a>
+      <nav class="top-links" aria-label="網站導覽">
+        <a href="/demo.html">五個預設劇本</a>
+        <a href="/">主網站</a>
+      </nav>
+    </header>
+
+    <main id="showcaseGuide" hidden>
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">✳ MIRACLEPAW · NGO / HKSEC · v0.7</div>
+          <h1>唔係叫你即刻改變，<em>係陪你行第一小步。</em></h1>
+          <p>呢度係俾 NGO、社工同創業評審睇嘅概念展示。揀適合你嘅導覽路線，用預設劇本認識星爪；所有故事都係虛構，並非真正 AI 對話或已驗證嘅心理健康成效。</p>
+          <div class="hero-actions">
+            <a class="primary-link" href="/demo.html">🐱 直接試五個安全劇本 <span aria-hidden="true">↗</span></a>
+            <button type="button" id="printBrief" class="secondary-button">列印／另存展示摘要</button>
+          </div>
+          <p class="hero-note">只供成年持份者概念評估 · 無聲稱已完成 NGO 試點、臨床驗證或實際改善成效</p>
+        </div>
+        <div class="hero-pet">
+          <img class="pet-tail" src="/miraclepaw-cat-tail.webp" alt="" aria-hidden="true" width="640" height="585" />
+          <img class="pet-body" src="/miraclepaw-cat-body.webp" alt="橘白色戴淺藍頸巾嘅小貓爪爪" width="640" height="585" />
+          <span class="pet-caption">你好，我係爪爪！</span>
+        </div>
+      </section>
+
+      <section class="evidence-strip" aria-label="產品目前進度和限制">
+        <div><span class="strip-type">已做 · 可試</span><strong>寵物互動與心情選擇</strong><p>本頁示範入口；心情資料只留當前頁面</p></div>
+        <div><span class="strip-type">已做 · 可試</span><strong>五個預設分支劇本</strong><p>危機、微行動、虛構寵物交流</p></div>
+        <div><span class="strip-type tentative">未完成 · 待驗證</span><strong>真 AI、安全評估與 NGO 試點</strong><p>目前不能聲稱效果已獲研究證實</p></div>
+      </section>
+
+      <section class="route-section" aria-labelledby="routeTitle">
+        <div class="section-header">
+          <div><span class="eyebrow">FOR PRESENTERS</span><h2 id="routeTitle">選擇你嘅展示路線</h2><p>兩條路線都由固定內容組成；可以隨時換路線或重播。</p></div>
+          <span class="no-score">無分數 · 無追蹤</span>
+        </div>
+        <div class="audience-options" role="group" aria-label="選擇展示對象">
+          <button type="button" id="routeHKSEC" data-audience="hksec" aria-pressed="true">
+            <span class="audience-icon" aria-hidden="true">💡</span><span><strong>HKSEC／創業評審</strong><small>社會問題 · 差異化 · 安全 · 驗證方向</small></span>
+          </button>
+          <button type="button" id="routeNGO" data-audience="ngo" aria-pressed="false">
+            <span class="audience-icon" aria-hidden="true">🤝</span><span><strong>NGO／社工合作</strong><small>服務邊界 · 自主權 · 私隱 · 試點設計</small></span>
+          </button>
+        </div>
+
+        <div class="guided-panel">
+          <div class="progress-header">
+            <span id="audienceTitle">HKSEC / 創業評審</span>
+            <span id="stepCount">第 1／5 步</span>
+          </div>
+          <div class="progress-track" role="progressbar" aria-label="展示導覽進度" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1" id="guideProgress"><span id="progressFill"></span></div>
+          <div class="step-chips" id="stepChips" role="group" aria-label="選擇導覽步驟"></div>
+          <div class="guide-content">
+            <div class="guide-main">
+              <span class="step-eyebrow" id="stepEyebrow">需求假設</span>
+              <h3 id="stepHeading" tabindex="-1">想解決嘅問題</h3>
+              <p class="step-focus" id="stepFocus">由陪伴開始，唔急住要求任何人改變。</p>
+              <div class="demo-link-block">
+                <span>相關示範 · 固定預設劇本</span>
+                <a href="/demo.html" id="openScenario">體驗情境 <span aria-hidden="true">↗</span></a>
+                <small>點擊後仍須先完成 v0.6 成年持份者確認，唔會繞過安全入口。</small>
+              </div>
+            </div>
+            <aside class="guide-notes" aria-labelledby="presenterNotesHeading">
+              <div class="notes-heading"><span class="notes-icon" aria-hidden="true">🎙️</span><h4 id="presenterNotesHeading">講解提示</h4></div>
+              <p id="presenterTalk">本區會顯示建議講解內容。</p>
+              <div class="evidence-note"><strong>證據界線</strong><p id="presenterEvidence">只講已完成嘅功能，未完成嘅成效另行驗證。</p></div>
+            </aside>
+          </div>
+          <div class="guide-controls">
+            <button type="button" id="previousStep" disabled><span aria-hidden="true">←</span> 上一步</button>
+            <button type="button" id="restartGuide">重新開始</button>
+            <button type="button" id="nextStep" class="next">下一步 <span aria-hidden="true">→</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="principles" aria-labelledby="principlesTitle">
+        <div class="section-header"><div><span class="eyebrow">SAFETY BY DESIGN</span><h2 id="principlesTitle">四條必須守住嘅底線</h2></div></div>
+        <div class="principle-grid">
+          <article><span aria-hidden="true">🤍</span><h3>永不懲罰</h3><p>唔出門、唔講嘢、唔記錄都唔會扣分、冷落或失去陪伴。</p></article>
+          <article><span aria-hidden="true">🛡️</span><h3>保留私隱</h3><p>冇真人即時定位；現時無家長／社工後台，亦唔開放第三方睇對話原文。</p></article>
+          <article><span aria-hidden="true">🐾</span><h3>社交完全自願</h3><p>先示範虛構寵物打招呼，唔強制真人配對或交流。</p></article>
+          <article><span aria-hidden="true">🫶</span><h3>危機持續陪伴</h3><p>顯示香港指定支援熱線，唔暗中聯絡緊急聯絡人；仍須正式安全驗證。</p></article>
+        </div>
+      </section>
+
+      <section class="discussion" aria-labelledby="discussionTitle">
+        <div><span class="eyebrow">NEXT: RESPONSIBLE VALIDATION</span><h2 id="discussionTitle">我哋希望同專業伙伴一齊驗證，而唔係假設已經成功。</h2><p>可能嘅下一步包括成年持份者可用性訪談、逐項劇本及私隱審查、危機應對專業審核，再按合適嘅倫理、同意與服務範圍考慮任何試點。現階段冇已完成嘅成效統計或未成年使用測試。</p></div>
+        <a href="/demo.html">再睇一次安全劇本 <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <footer class="showcase-footer">MiraclePaw 星爪 · v0.7 成年持份者概念展示 · 非醫療服務 · 非 AI 生成對話 · 無任何真實服務使用者個案</footer>
+    </main>
+
+    <div class="showcase-gate" id="showcaseGate" role="dialog" aria-modal="true" aria-labelledby="showcaseGateTitle">
+      <div class="gate-card">
+        <div class="gate-symbol" aria-hidden="true">🐱</div>
+        <span class="eyebrow">MiraclePaw · 評審與 NGO 內部展示</span>
+        <h2 id="showcaseGateTitle">歡迎參觀星爪</h2>
+        <p>呢頁係 NGO／HKSEC 簡報導覽，只有預先撰寫嘅文字同劇本連結。唔會要求真實心情、姓名或者個人資料，亦唔會連接 AI API。</p>
+        <p class="gate-alert">只供成年團隊成員與獲邀持份者內部評估；唔係醫療服務、未成年人正式情緒支援或真實危機處理平台。勾選確認唔等於正式年齡核實。</p>
+        <label class="gate-check"><input id="showcaseAdult" type="checkbox" /><span>我係成年人，明白全部係概念及預設示範，未有正式成效或安全驗證。</span></label>
+        <button id="enterShowcase" class="enter-showcase" type="button" disabled>開始展示導覽 <span aria-hidden="true">→</span></button>
+        <a href="/" class="gate-back">返回主網站</a>
+      </div>
+    </div>
+    <noscript><p class="no-script">導覽需要啟用 JavaScript；唔需要 AI API。</p></noscript>
+  </div>
+</body>
+</html>
