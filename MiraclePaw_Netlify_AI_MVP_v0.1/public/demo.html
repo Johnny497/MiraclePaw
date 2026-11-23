@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f5f7ee" />
+  <meta name="description" content="MiraclePaw 星爪 v0.6 — 固定劇本安全情境展示，供成年團隊及持份者內部測試，並非真實 AI 聊天。" />
+  <title>星爪 MiraclePaw｜安全情境展示模式</title>
+  <link rel="stylesheet" href="/demo.css" />
+  <script type="module" src="/demo.js"></script>
+</head>
+<body>
+  <div class="demo-shell">
+    <header class="demo-header">
+      <a class="demo-brand" href="/" aria-label="返回星爪 MiraclePaw 主網站">
+        <span class="demo-brand-icon" aria-hidden="true">🐾</span>
+        <span><strong>星爪 <span>MiraclePaw</span></strong><small>陪你慢慢嚟。</small></span>
+      </a>
+      <div class="demo-header-actions">
+        <span class="mode-chip">固定劇本 · 非真實 AI</span>
+        <a class="back-link" href="/">返回主網站 <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <main class="demo-main" id="demoExperience" hidden>
+      <section class="demo-intro">
+        <div class="eyebrow">✳ MIRACLEPAW · v0.6 / ADULT STAKEHOLDER DEMO</div>
+        <h1>用幾分鐘，認識爪爪點樣<span>陪伴每一種心情。</span></h1>
+        <p>揀一個預設情境，再按選項睇下一段。全部角色、名字同對白都係虛構同事先撰寫，<strong>唔會連接 OpenAI、上傳資料或模擬真人配對。</strong></p>
+      </section>
+
+      <div class="demo-layout">
+        <nav class="scenario-sidebar" aria-label="選擇預設情境">
+          <div class="sidebar-top">
+            <span class="sidebar-title">五個核心情境</span>
+            <span class="sidebar-subtitle">可以自由切換，冇分數或任務要求</span>
+          </div>
+          <button class="scenario-option" type="button" data-scenario="low-mood" aria-pressed="false">
+            <span class="scene-icon" aria-hidden="true">🤍</span>
+            <span><strong>情緒低落</strong><small>唔需要急住變好</small></span>
+            <span class="scenario-chevron" aria-hidden="true">›</span>
+          </button>
+          <button class="scenario-option" type="button" data-scenario="name-mood" aria-pressed="false">
+            <span class="scene-icon" aria-hidden="true">✨</span>
+            <span><strong>名字與心情</strong><small>預設劇本上下文</small></span>
+            <span class="scenario-chevron" aria-hidden="true">›</span>
+          </button>
+          <button class="scenario-option" type="button" data-scenario="small-steps" aria-pressed="false">
+            <span class="scene-icon" aria-hidden="true">🌤</span>
+            <span><strong>自願微行動</strong><small>由窗邊開始都可以</small></span>
+            <span class="scenario-chevron" aria-hidden="true">›</span>
+          </button>
+          <button class="scenario-option" type="button" data-scenario="pet-hello" aria-pressed="false">
+            <span class="scene-icon" aria-hidden="true">🐾</span>
+            <span><strong>寵物先打招呼</strong><small>冇真人、冇定位</small></span>
+            <span class="scenario-chevron" aria-hidden="true">›</span>
+          </button>
+          <button class="scenario-option" type="button" data-scenario="safety" aria-pressed="false">
+            <span class="scene-icon" aria-hidden="true">🫶</span>
+            <span><strong>危機支援流程</strong><small>陪伴與固定香港熱線</small></span>
+            <span class="scenario-chevron" aria-hidden="true">›</span>
+          </button>
+          <div class="sidebar-note">
+            <strong>🤍 不批判、不懲罰</strong>
+            <p>沉默、拒絕任務或者唔想出門，爪爪都唔會停止陪伴。</p>
+          </div>
+        </nav>
+
+        <section class="demo-story" aria-labelledby="demoSceneTitle">
+          <div class="story-topline">
+            <span class="script-label">預設互動劇本 · 唔係 AI 回覆</span>
+            <span id="sceneIndicator" class="scene-indicator">選擇情境</span>
+          </div>
+          <div class="demo-pet-area">
+            <div class="pet-portrait" aria-label="橘白色虛擬小貓爪爪">
+              <img class="pet-tail" src="/miraclepaw-cat-tail.webp" width="640" height="585" alt="" aria-hidden="true" />
+              <img class="pet-body" src="/miraclepaw-cat-body.webp" width="640" height="585" alt="橘白色大眼小貓，戴住淺藍色三角頸巾" />
+            </div>
+            <div class="pet-prompt" id="demoPetPrompt">你好呀，我係爪爪！</div>
+          </div>
+          <div class="scene-heading">
+            <h2 id="demoSceneTitle" tabindex="-1">揀一個情境開始</h2>
+            <p id="demoSceneSummary">試玩劇本嘅內容全部係虛構示範，唔會經過 AI 模型。</p>
+          </div>
+
+          <div class="demo-transcript" id="demoTranscript" role="log" aria-live="polite" aria-relevant="additions" aria-label="預設情境對話"></div>
+          <div id="demoChoices" class="demo-choices" role="group" aria-label="選擇下一段固定劇本"></div>
+          <p id="demoStepNote" class="demo-step-note" role="status" aria-live="polite">以下展示全部係預先編寫嘅台詞。</p>
+
+          <aside id="crisisResources" class="crisis-resources" aria-labelledby="crisisTitle" hidden>
+            <h3 id="crisisTitle">香港支援資源（你可自行決定是否致電）</h3>
+            <p>如有即時危險，請考慮聯絡緊急服務或附近可信任嘅人。星爪唔會暗中聯絡第三方。</p>
+            <div class="crisis-links">
+              <a href="tel:23892222">撒瑪利亞會 2389 2222</a>
+              <a href="tel:23820000">生命熱線 2382 0000</a>
+              <a href="tel:999">即時危險：999</a>
+            </div>
+          </aside>
+
+          <div class="demo-foot-actions">
+            <button type="button" id="restartScene">↻ 重播呢個劇本</button>
+            <button type="button" id="nextScene">試下一個情境 <span aria-hidden="true">→</span></button>
+          </div>
+          <p class="demo-disclaimer">本頁只供獲邀成年團隊／社工／NGO 持份者以虛構資料試玩；唔係醫療、心理治療、緊急求助或已驗證嘅未成年人服務。固定劇本無法證明真實 AI 嘅準確性或安全性。</p>
+        </section>
+      </div>
+    </main>
+
+    <div class="demo-age-gate" id="demoGate" role="dialog" aria-modal="true" aria-labelledby="demoGateTitle">
+      <div class="age-card">
+        <div class="gate-icon" aria-hidden="true">🐱</div>
+        <div class="eyebrow">MiraclePaw · 固定劇本展示</div>
+        <h2 id="demoGateTitle">歡迎試玩爪爪嘅小故事</h2>
+        <p>呢個係獨立、離線式嘅網頁劇本，<strong>唔需要 OpenAI API Key 或試玩密碼</strong>。所有台詞都係預先設計，唔係 AI 真實回覆；唔提供自由輸入。</p>
+        <div class="gate-alert">只供成年團隊成員及獲邀持份者內部試玩。請勿用作未成年人正式情緒支援服務、醫療診斷或緊急求助。</div>
+        <label class="age-check"><input type="checkbox" id="demoAdultAgree" /><span>我係成年人，明白以上限制，並會以虛構情境試玩。</span></label>
+        <button type="button" id="demoStart" class="start-demo" disabled>開始安全情境展示 <span aria-hidden="true">→</span></button>
+        <a class="age-return" href="/">返回星爪主網站</a>
+      </div>
+    </div>
+    <noscript><p class="noscript-alert">呢個互動展示需要啟用 JavaScript。無需連接 AI API。</p></noscript>
+    <footer class="demo-footer">© MiraclePaw · v0.6 概念測試 · 固定台詞／冇真人配對／冇 GPS／冇資料上傳</footer>
+  </div>
+</body>
+</html>
