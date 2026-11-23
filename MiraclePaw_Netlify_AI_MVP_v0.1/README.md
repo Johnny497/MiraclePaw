@@ -1,8 +1,16 @@
-# 星爪 MiraclePaw — Netlify Web App（內部 MVP v0.7）
+# 星爪 MiraclePaw — Netlify Web App（內部 MVP v0.8）
 
 > **用途：** 內部團隊及**成年** NGO／社工持份者試玩展示，並非已完成安全驗證的未成年人產品；不能用於緊急求助、醫療診斷或治療。
 
 這份專案由零建立，採用 **純 HTML / CSS / JavaScript + Netlify Functions + OpenAI Responses API**，不需要資料庫，也不必預先安裝 React。
+
+## v0.8 — NGO／HKSEC 展示驗收與常見問題
+
+- 新增 `/review.html` 成年持份者內部展示頁：評審／社工常見問題、講解一致性，以及實際展示檢查清單。
+- 將已實作的原型功能與未完成的安全審核、成效驗證及合作試點清楚分開，**不得虛構臨床成效、合作協議或未成年人實際使用**。
+- 只建議以虛構資料測試；唔用真實學生資料。檢查進度如有互動，只限目前頁面示範，不代表正式測試記錄或統計。
+- 本版唔改 OpenAI API Billing、危機電話、原有聊天、寵物互動、心情記錄或 v0.6 固定劇本。
+- `npm test` 會核對 QA／FAQ 相關界面、資料保護及原有功能。
 
 ## v0.7 — NGO／HKSEC 評審展示導覽
 
