@@ -93,10 +93,25 @@ $('resetReview').addEventListener('click', () => {
   $('checkProgress').focus?.();
 });
 
+let faqOpenBeforePrint = null;
+function expandFAQForPrint() {
+  const details = [...$('faqItems').querySelectorAll('details')];
+  faqOpenBeforePrint = details.map((element) => element.open);
+  details.forEach((element) => { element.open = true; });
+}
+function restoreFAQAfterPrint() {
+  if (!faqOpenBeforePrint) return;
+  const details = [...$('faqItems').querySelectorAll('details')];
+  details.forEach((element, index) => { element.open = Boolean(faqOpenBeforePrint[index]); });
+  faqOpenBeforePrint = null;
+}
+
 $('printReview').addEventListener('click', () => {
-  // Uses the browser's own print/save dialog: no third-party PDF generation.
+  // Expand all authored answers before opening the browser's own print dialog.
+  expandFAQForPrint();
   window.print();
 });
+window.addEventListener('afterprint', restoreFAQAfterPrint);
 
 $('reviewAdult').addEventListener('change', () => {
   $('enterReview').disabled = !$('reviewAdult').checked;
