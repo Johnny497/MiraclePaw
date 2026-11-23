@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f7f8f1" />
+  <meta name="description" content="MiraclePaw 星爪 v0.9 NGO／HKSEC 成年持份者 3 分鐘 Pitch Mode、建議試點及成效指標；全部為概念示範，並非已驗證結果。" />
+  <title>星爪 MiraclePaw｜v0.9 NGO／HKSEC Pitch Mode</title>
+  <link rel="stylesheet" href="/pitch.css" />
+  <script type="module" src="/pitch.js"></script>
+</head>
+<body>
+  <div class="pitch-shell">
+    <header class="pitch-header">
+      <a href="/" class="brand" aria-label="返回星爪主網站"><span class="brand-mark" aria-hidden="true">🐾</span><span><strong>星爪 <em>MiraclePaw</em></strong><small>陪你慢慢嚟。</small></span></a>
+      <nav class="top-nav" aria-label="展示資源導覽">
+        <a href="/showcase.html">評審導覽</a>
+        <a href="/review.html">FAQ／驗收</a>
+        <a href="/demo.html">安全劇本</a>
+        <a href="/">主網站</a>
+      </nav>
+    </header>
+
+    <main id="pitchMain" hidden>
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="hero-copy">
+          <span class="eyebrow">MIRACLEPAW · V0.9 · NGO / HKSEC</span>
+          <h1 id="heroTitle">三分鐘講清楚，<em>點解星爪值得被驗證。</em></h1>
+          <p>畀成年持份者嘅現場 Pitch 練習頁：一鍵切換 HKSEC 或 NGO 路線、睇逐段講稿同時間提示。呢啲係建議講解稿，唔係成果報告，亦唔代表有已完成嘅服務試點。</p>
+          <div class="hero-actions">
+            <a href="#pitchDeck" class="primary-link">開始 3 分鐘講解 ↓</a>
+            <a href="/demo.html">開啟無 AI 依賴固定劇本 →</a>
+          </div>
+          <p class="hero-note">由本人控制計時；不會自動跳頁、記錄聽眾資料或連接 AI API。</p>
+        </div>
+        <div class="cat-portrait" aria-label="橘白色虛擬小貓爪爪">
+          <img class="cat-tail" src="/miraclepaw-cat-tail.webp" width="640" height="585" alt="" aria-hidden="true" />
+          <img class="cat-body" src="/miraclepaw-cat-body.webp" width="640" height="585" alt="戴淺藍色頸巾嘅橘白小貓爪爪" />
+          <span class="cat-bubble">慢慢嚟，我陪你。</span>
+        </div>
+      </section>
+
+      <div class="truth-strip" aria-label="證據狀態">
+        <div><span class="chip shipped">已可展示</span><strong>寵物互動、心情選擇</strong><p>原型存在 ≠ 成效得到證明</p></div>
+        <div><span class="chip shipped">已可展示</span><strong>五個固定虛構劇本</strong><p>無需 AI API；並非真 AI 回覆</p></div>
+        <div><span class="chip pending">待專業驗證</span><strong>NGO 試點、臨床成效、安全審查</strong><p>未完成，唔會當成既有成果</p></div>
+      </div>
+
+      <section class="deck-section" id="pitchDeck" aria-labelledby="deckTitle">
+        <div class="section-heading">
+          <div><span class="eyebrow">PITCH REHEARSAL · 180 SECONDS</span><h2 id="deckTitle">3 分鐘 Pitch Mode</h2><p>五段加起來 180 秒。建議時間純屬排練參考；投影片由你自己控制，計時唔會自動跳段。</p></div>
+          <span class="review-only">只供成年持份者展示</span>
+        </div>
+
+        <div class="deck-toolbar">
+          <div class="audience-choice" role="group" aria-label="選擇簡報對象">
+            <button type="button" id="pitchHKSEC" data-pitch-audience="hksec" aria-pressed="true">💡 HKSEC 評審</button>
+            <button type="button" id="pitchNGO" data-pitch-audience="ngo" aria-pressed="false">🤝 NGO／社工</button>
+          </div>
+          <div class="timer-panel" aria-label="可選講解計時器">
+            <div><small>講解時間</small><strong id="timerDisplay" role="timer" aria-live="off" aria-label="已經過時間">00:00 / 03:00</strong></div>
+            <div class="timer-buttons">
+              <button type="button" id="startTimer">開始計時</button>
+              <button type="button" id="pauseTimer" disabled>暫停</button>
+              <button type="button" id="resetTimer">重設</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pitch-card">
+          <div class="pitch-card-heading">
+            <div><span class="eyebrow" id="pitchEyebrow">01 · NEED / HYPOTHESIS</span><h3 id="pitchStepTitle" tabindex="-1">要解決嘅問題</h3></div>
+            <div class="pitch-counter"><strong id="pitchCount">01 / 05</strong><span id="durationCue">建議 30 秒</span></div>
+          </div>
+          <div class="slide-track" role="progressbar" id="pitchProgress" aria-label="Pitch 講稿段落" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1"><span id="pitchProgressFill"></span></div>
+          <div class="step-buttons" role="group" aria-label="選擇 Pitch 段落" id="pitchStepButtons"></div>
+          <div class="slide-content">
+            <article class="speaker-copy">
+              <span class="small-label">觀眾會睇到嘅重點</span>
+              <p class="slide-headline" id="pitchHeadline">有時最難嘅，唔係社交；係踏出第一步。</p>
+              <span class="small-label">🎙️ 建議口述稿 · 非已發生嘅成果</span>
+              <p id="pitchScript" class="pitch-script">星爪希望由無批判陪伴開始。</p>
+            </article>
+            <aside class="proof-card" aria-labelledby="proofTitle">
+              <h4 id="proofTitle">必須講清楚嘅證據界線</h4>
+              <p id="pitchEvidence">需要同受眾適配仍待驗證。</p>
+              <a id="pitchDemoLink" href="/demo.html?scene=low-mood">對應固定劇本 →</a>
+              <small>進入固定劇本仍須成年人自行確認，唔會繞過入口。</small>
+            </aside>
+          </div>
+          <div class="deck-controls">
+            <button type="button" id="previousPitch" disabled>← 上一段</button>
+            <button type="button" id="restartPitch">由第一段開始</button>
+            <button type="button" id="nextPitch" class="primary-button">下一段 →</button>
+          </div>
+          <p id="pitchStatus" class="timer-status" role="status" aria-live="polite">未開始計時。可以直接逐段講解。</p>
+        </div>
+      </section>
+
+      <section class="planning-section" id="pilotPlan" aria-labelledby="pilotTitle">
+        <div class="section-heading">
+          <div><span class="eyebrow">PROPOSED NGO COLLABORATION · NOT AN AGREEMENT</span><h2 id="pilotTitle">NGO 試點合作：先守住三道關</h2><p>以下係同合作伙伴討論嘅建議流程，**全部尚未開始或獲批**；唔會因為 Pitch 完成而自動開始真人試點。</p></div>
+        </div>
+        <div class="pilot-grid" id="pilotStages"></div>
+        <p class="integrity-note">研究或真實服務前，必須獨立完成適用倫理、法律、私隱、危機應對及兒童保障審核。未獲批准時，僅限虛構資料及獲邀成年專業人士評估。</p>
+      </section>
+
+      <section class="planning-section" id="impactPlan" aria-labelledby="impactTitle">
+        <div class="section-heading">
+          <div><span class="eyebrow">IMPACT MEASUREMENT · NO RESULTS YET</span><h2 id="impactTitle">成效指標建議，而唔係成效數據</h2><p>先量度可用性、選擇權及安全資訊，再討論有冇理由設計正式研究。現時冇真實參加者數據、對照組或療效結論。</p></div>
+        </div>
+        <div class="measures-grid" id="proposedMeasures"></div>
+      </section>
+
+      <section class="planning-section" id="fallbackPlan" aria-labelledby="fallbackTitle">
+        <div class="section-heading">
+          <div><span class="eyebrow">DEMO RESILIENCE</span><h2 id="fallbackTitle">現場展示失靈時點做？</h2><p>固定劇本同導覽頁唔需要 OpenAI API 或預設真實用戶資料，但初次打開網站仍可能需要網絡。</p></div>
+        </div>
+        <div id="fallbackSteps" class="fallback-list"></div>
+        <div class="resource-actions">
+          <a href="/demo.html?scene=small-steps" class="primary-link">🎬 開啟自願微行動劇本</a>
+          <a href="/demo.html?scene=safety">🫶 開啟危機支援劇本</a>
+          <a href="/review.html">🧾 展示前驗收及 FAQ</a>
+          <button type="button" id="printPitch">列印／另存講解摘要</button>
+        </div>
+      </section>
+
+      <footer class="pitch-footer">星爪 MiraclePaw · v0.9 成年持份者概念展示 · 非醫療或已驗證危機介入服務 · 無真實使用者個案、NGO 合作成果或成效數據</footer>
+    </main>
+
+    <div class="pitch-gate" id="pitchGate" role="dialog" aria-modal="true" aria-labelledby="pitchGateTitle">
+      <div class="gate-card">
+        <div class="gate-icon" aria-hidden="true">🐱</div>
+        <span class="eyebrow">MIRACLEPAW · V0.9 · 成年持份者 Pitch</span>
+        <h2 id="pitchGateTitle">先確認展示範圍</h2>
+        <p>呢個頁面只供獲邀成年團隊、NGO／社工同 HKSEC 評審參考，內容係預先編寫嘅講稿、建議指標同試點框架；唔會向你索取真實個案、心情資料或者姓名。</p>
+        <p class="gate-warning"><strong>重要：</strong>呢個係未完成正式心理健康、安全及兒童保障驗證嘅概念原型，唔可以當成醫療服務、未成年人正式支援或即時求助工具。勾選唔等於正式身份核實。</p>
+        <label class="gate-check"><input type="checkbox" id="pitchAdult" /><span>我係成年人，明白全部只係概念展示，未有 NGO 試點、臨床效果或者未成年人安全驗證成果。</span></label>
+        <button type="button" id="enterPitch" class="gate-enter" disabled>進入 Pitch Mode →</button>
+        <a href="/" class="gate-return">返回星爪主網站</a>
+      </div>
+    </div>
+    <noscript><p class="no-script">此展示頁需要 JavaScript，但唔需要 AI API。只供獲邀成年持份者。</p></noscript>
+  </div>
+</body>
+</html>
