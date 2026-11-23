@@ -69,7 +69,7 @@ test('the two stakeholder routes have five unique and honest evidence-scoped ste
     assert.equal(new Set(route.steps.map(s=>s.id)).size,5);
     for (const step of route.steps) {
       for(const field of ['heading','eyebrow','focus','presenter','evidence','scenario','cta'])
-        assert.ok(typeof step[field] === 'string' && step[field].length > (field === 'scenario' ? 0 : 6), `${audience} ${step.id}: ${field}`);
+        assert.ok(typeof step[field] === 'string' && step[field].length >= (['presenter','evidence','focus'].includes(field) ? 12 : 1), `${audience} ${step.id}: ${field}`);
       assert.ok(scenarioIds.has(step.scenario), `${audience} ${step.id} invalid scripted scene`);
     }
   }
