@@ -1,0 +1,99 @@
+/* v1.1 NGO Partnership Toolkit: visual additions to pilot.css.
+ * Presentation only. No network fonts, external assets, trackers or forms. */
+.partner-hero{background:linear-gradient(132deg,#fffdf8 0%,#eef8ed 100%)}
+.partner-hero h1 em{color:#428b63}
+.partner-hero .cat-bubble{max-width:170px;text-align:center}
+.partner-section{scroll-margin-top:24px}
+.outreach-layout{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(290px,.78fr);gap:14px;align-items:start}
+.draft-panel,.checklist-panel,.onepager-card,.fit-card,.role-card,.term-card{background:#fff;border:1px solid #d9e8dc;border-radius:19px;box-shadow:0 7px 18px #315c4211;min-width:0}
+.draft-panel,.checklist-panel{padding:24px}
+.draft-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.draft-controls label{display:flex;flex-direction:column;gap:8px;font-size:12px;font-weight:850;color:#417054}
+.draft-controls select{width:100%;border:1px solid #c2d9c7;border-radius:10px;background:#fbfdf8;padding:10px 11px;color:#2b6347;font-size:13px;min-width:0}
+.field-label{display:block;font-size:12px;color:#3f7257;font-weight:800;margin:15px 0 8px}
+#draftSubject,#draftBody{display:block;width:100%;font:inherit;font-size:13px;line-height:1.8;background:#f8faf6;border:1px solid #d3e3d5;border-radius:11px;color:#324d3b;resize:vertical}
+#draftSubject{padding:12px;height:auto}
+#draftBody{padding:13px 14px;min-height:270px;max-height:640px;white-space:pre-wrap;overflow:auto}
+#draftSubject:focus,#draftBody:focus{outline:3px solid #c2dfcd;outline-offset:2px}
+.draft-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}
+.draft-actions button,.brief-tools button,.review-footer button{border:1px solid #b9d6c3;border-radius:10px;background:#fff;color:#367253;padding:11px 15px;font-size:12px;font-weight:850;line-height:1.3}
+.draft-actions .primary-action,.brief-tools button{background:#367f5d;border-color:#367f5d;color:#fff}
+#draftStatus{background:#eff8ed;border-radius:9px;padding:11px 12px;color:#3a7651}
+.warning-line{font-size:11px;line-height:1.9;color:#865e3f;background:#fff4e8;border:1px solid #ecd8c3;border-radius:9px;padding:11px;margin:10px 0 0}
+.checklist-panel h3{font-size:18px;margin:0 0 8px}
+.checklist-panel>p{color:#677f6d;line-height:1.85;font-size:12px;margin:0 0 18px}
+.outreach-checks{display:grid;gap:9px}
+.outreach-check{display:flex;align-items:flex-start;gap:11px;background:#f6faf4;border:1px solid #dfebdf;border-radius:10px;padding:12px;cursor:pointer}
+.outreach-check input{accent-color:#367f5d;width:17px;height:17px;flex:0 0 17px;margin:3px 0 0}
+.outreach-check .check-copy{display:flex;flex-direction:column;gap:4px}
+.outreach-check strong{font-size:12px;color:#315c41}
+.outreach-check small{font-size:11px;color:#748477;line-height:1.7}
+.review-footer{display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid #dfecdf;margin-top:17px;padding-top:14px;flex-wrap:wrap}
+.review-footer strong{font-size:12px;color:#3b7854}
+.brief-tools{display:flex;align-items:center;flex-shrink:0}
+.onepager-card{max-width:990px;padding:29px 34px;background:#fffdf8}
+.brief-topline{display:flex;gap:12px;align-items:center;justify-content:space-between;border-bottom:2px solid #dcebdc;padding-bottom:13px;font-size:11px;color:#428569;font-weight:850;letter-spacing:.3px}
+.brief-stamp{color:#789d84;font-size:10px;white-space:nowrap}
+.onepager-card h3{font-size:clamp(22px,2.5vw,31px);letter-spacing:-.6px;margin:20px 0 12px;line-height:1.4;color:#26533b}
+.brief-lead{font-size:14px;line-height:1.9;color:#5a6e5c;margin:0 0 18px}
+.brief-content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.brief-cell{padding:14px;border:1px solid #e5efe2;border-radius:12px;background:#f9fbf7}
+.brief-cell h4{font-size:12px;color:#3c7e59;margin:0 0 8px}
+.brief-cell p{font-size:12px;line-height:1.8;color:#526d59;margin:0}
+.brief-content .brief-cell:last-child{background:#fcf3e6;border-color:#efdfc9}
+.brief-footer{border-top:1px solid #dce9db;margin:18px 0 0;padding-top:12px;color:#65806b;font-size:11px;line-height:1.7}
+.fit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fit-card{padding:21px}
+.fit-number{color:#429568;font-weight:900;font-size:12px}
+.fit-card h3{font-size:15px;line-height:1.55;margin:12px 0 9px}
+.fit-card p{font-size:12px;line-height:1.85;color:#6d8570;margin:0}
+.roles-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.role-card{padding:20px}
+.role-card h3{font-size:16px;margin:0 0 14px;color:#376e51}
+.partner-detail,.boundary{font-size:12px;line-height:1.9;color:#557360;margin:8px 0}
+.partner-detail strong,.boundary strong{color:#305140}
+.boundary{border-left:3px solid #d6ae7b;background:#fdf5e8;border-radius:7px;padding:10px;color:#79583a}
+.terms-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.term-card{padding:19px}
+.term-card h4{font-size:15px;color:#326e4d;margin:0 0 10px}
+.term-card>p:not(.boundary){font-size:12px;line-height:1.85;color:#65806c;margin:0 0 12px}
+.integrity-note{background:#fcf4e9;border:1px solid #eedec7;border-radius:12px;color:#826244;font-size:12px;line-height:1.9;padding:15px 18px;margin-top:13px}
+.next-list{background:#fff;border:1px solid #dce8dd;border-radius:18px;margin:0;padding:20px 25px 20px 43px}
+.next-list li{padding:9px 0;color:#55745e;font-size:13px;line-height:1.85}
+.next-list li::marker{color:#397f59;font-weight:850}
+@media(max-width:900px){
+  .outreach-layout{grid-template-columns:1fr}
+  .fit-grid,.roles-list,.terms-grid{grid-template-columns:1fr}
+  .onepager-card{max-width:100%}
+}
+@media(max-width:630px){
+  .draft-panel,.checklist-panel{padding:18px}
+  .draft-controls{grid-template-columns:1fr}
+  .draft-actions button{width:100%}
+  .brief-tools{width:100%}
+  .brief-tools button{width:100%}
+  .onepager-card{padding:19px}
+  .brief-content{grid-template-columns:1fr}
+  .brief-topline{flex-wrap:wrap}
+  .brief-cell{padding:12px}
+  .review-footer{align-items:flex-start;flex-direction:column}
+  .review-footer button{width:100%}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{
+  @page{size:A4;margin:10mm}
+  html,body{background:white!important;color:#111}
+  .pilot-shell{width:100%;max-width:none}
+  .pilot-header,.hero,.status-grid,.stop-banner,.section-nav,.partner-section:not(#brief),#brief .section-top,.pilot-footer,.adult-gate,.brief-tools{display:none!important}
+  .main-section#brief{display:block!important;margin:0!important;padding:0!important}
+  #partnersMain{display:block!important}
+  .onepager-card{border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;margin:0!important;max-width:none!important}
+  .brief-topline{padding-bottom:7px}
+  .onepager-card h3{font-size:17pt;margin:10px 0 7px}
+  .brief-lead{font-size:9.5pt;line-height:1.55;margin-bottom:9px}
+  .brief-content{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+  .brief-cell{padding:7px;border:1px solid #ddd;break-inside:avoid}
+  .brief-cell h4{font-size:9pt;margin:0 0 3px}
+  .brief-cell p{font-size:8pt;line-height:1.5}
+  .brief-footer{font-size:8pt;margin:9px 0 0;padding-top:7px}
+}
