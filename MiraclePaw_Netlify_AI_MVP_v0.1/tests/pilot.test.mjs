@@ -52,6 +52,7 @@ function simulate() {
   els.pilotMain.hidden=true;
   els.enterPilot.disabled=true;
   els.riskCategory.value='all';
+  els.statusTitle.textContent='目前狀態：NO-GO（不可啟動真實服務試點）';
   let printCount=0;
   const document={
     getElementById:id=>els[id]||null,
