@@ -12,6 +12,15 @@ const equal = (a, b) => {
 const crisis = /自殺|自殘|想死|唔想活|不想活|傷害自己|傷害別人|跳樓|kill myself|suicid|self[ -]?harm|hurt myself|kill someone/i;
 const hotline = '撒瑪利亞會 2389 2222｜生命熱線 2382 0000';
 const support = `爪爪仍然喺度陪你。你可以自行聯絡 ${hotline}；有即時危險請打香港 999。星爪唔會暗中通知其他人。`;
+const safeFallback = '爪爪暫時未能安全回覆呢句，但我仍然喺度陪你。你可以轉用免費本地陪伴。';
+async function moderate(text, key) {
+  const response = await postJson('https://api.openai.com/v1/moderations',
+    { model: 'omni-moderation-latest', input: text }, key);
+  const result = response?.results?.[0];
+  if (!result || typeof result.flagged !== 'boolean' || !result.categories)
+    throw new Error('invalid_moderation');
+  return result.flagged;
+}
 async function postJson(url, payload, key, timeoutMs = 12000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -49,12 +58,8 @@ export default async function handler(request) {
   if (crisis.test(message)) return reply({ reply: support, crisis: true });
   try {
     // Independent input moderation is mandatory. Fail closed if unavailable.
-    const moderation = await postJson('https://api.openai.com/v1/moderations',
-      { model: 'omni-moderation-latest', input: message }, moderationKey);
-    const result = moderation?.results?.[0];
-    if (!result || typeof result.flagged !== 'boolean' || !result.categories)
-      throw new Error('invalid_moderation');
-    if (result.flagged) return reply({ reply: support, crisis: true });
+    if (await moderate(message, moderationKey))
+      return reply({ reply: safeFallback, crisis: false, filtered: true });
     const answer = await postJson('https://api.deepseek.com/chat/completions', {
       model: 'deepseek-chat', stream: false, max_tokens: 250, temperature: 0.5,
       messages: [
@@ -64,8 +69,10 @@ export default async function handler(request) {
     }, deepseekKey);
     const output = answer?.choices?.[0]?.message?.content;
     if (typeof output !== 'string' || !output.trim() || output.length > 1600) throw new Error('invalid_output');
-    // Fail closed for obvious crisis signals; this is NOT independent output moderation.
-    if (crisis.test(output)) return reply({ reply: support, crisis: true });
+    // Never display model text before independent output moderation succeeds.
+    // The output check is an additional guardrail, not a clinical safety guarantee.
+    if (crisis.test(output) || await moderate(output, moderationKey))
+      return reply({ reply: safeFallback, crisis: false, filtered: true });
     return reply({ reply: output, crisis: false, sandbox: true });
   } catch {
     // No secrets, user content or upstream response bodies in logs or response.
