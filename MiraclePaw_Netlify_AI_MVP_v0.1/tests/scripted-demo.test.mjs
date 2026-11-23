@@ -90,8 +90,9 @@ test('scripted demo has no API, user text input, analytics or browser persistenc
   assert.doesNotMatch(runtime, /\.innerHTML\s*=/);
 });
 
-test('existing homepage links to offline demo even from welcome gate', () => {
-  assert.equal((mainHtml.match(/href="\/demo.html"/g) || []).length, 2);
+test('homepage, welcome gate and AI failure fallback link to the five scripted demos', () => {
+  assert.equal((mainHtml.match(/href="\/demo.html"/g) || []).length, 3);
+  assert.match(mainHtml, /id="aiFallback"[^>]*role="status"/);
   assert.match(mainHtml, /src="\/app\.js"/);
   assert.match(mainHtml, /src="\/mood\.js"/);
   assert.match(demoCss, /prefers-reduced-motion:reduce/);
