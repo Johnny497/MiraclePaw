@@ -220,3 +220,8 @@
 }
 .offline-demo-link.showcase-entry span { color:#9c815e; }
 .offline-demo-link.showcase-entry:hover { background:#ffedce; }
+
+/* v1.3: non-alarming, keyboard-accessible fallback when optional AI is unavailable. */
+.ai-fallback{background:#eff8ee;border-color:#bcdcc5;color:#365e45}
+.ai-fallback a{color:#276e4c;font-weight:800}
+.ai-fallback[hidden]{display:none!important}
