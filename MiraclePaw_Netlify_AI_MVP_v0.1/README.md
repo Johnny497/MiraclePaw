@@ -1,8 +1,19 @@
-# 星爪 MiraclePaw — Netlify Web App（內部 MVP v1.2）
+# 星爪 MiraclePaw — Netlify Web App（內部 MVP v1.3）
 
 > **用途：** 內部團隊及**成年** NGO／社工持份者試玩展示，並非已完成安全驗證的未成年人產品；不能用於緊急求助、醫療診斷或治療。
 
 這份專案由零建立，採用 **純 HTML / CSS / JavaScript + Netlify Functions + OpenAI Responses API**，不需要資料庫，也不必預先安裝 React。
+
+## v1.3 — Product Hardening & Evidence Pack（內部驗證，不是臨床或安全認證）
+
+- **真 AI 錯誤處理**：對 OpenAI 上游 429／`AbortError` 超時分別回覆 `AI_LIMIT`（503）／`AI_TIMEOUT`（504），其它安全檢查或模型錯誤維持 `AI_UNAVAILABLE`（502）。不自動重試，不把上游錯誤內文、API Key、聊天原文寫入應用程式日誌；不能保證基建／供應商日誌行為。
+- **AI 額外守門**：模型輸出含已知明確危機關鍵詞時，優先顯示固定香港危機支援回覆，唔額外增加 Moderation API 請求。呢個只係保守關鍵詞保護，**不是**全面生成內容審核或臨床危機安全證明。
+- **拒絕出門零網絡請求**：主頁「今日唔想出門」只提供本地溫柔回應，唔會喺輸入密碼後悄悄向 AI 發送預設訊息或用掉 API 額度；不影響自願自由輸入。
+- **無 AI 備援**：API 故障會在聊天區顯示連到 `/demo.html` 嘅固定虛構劇本；冇 API Billing 都可以演示基本陪伴。初次載入 Netlify 網站仍可能需要網絡，**未製作離線 PWA**。
+- **Mock 測試**：`tests/hardening.test.mjs`、`tests/frontend-hardening.test.mjs` 模擬 429、超時、Moderation 故障、危機輸出、歷史格式錯誤、拒絕出門及備援。所有測試都不調用真 OpenAI API。
+- **獨立工程證據文件**：`docs/PRODUCT_HARDENING_EVIDENCE_v1_3.md` 列出已驗證代碼控制、所對應測試、仍未完成嘅專業審查與桌面／手機 QA 清單。
+- **仍屬 NO-GO**：尚未有跨 Netlify 實例嘅持久化限流／費用防濫用控制、正式身份驗證、獨立危機安全、兒童保障、私隱與倫理批准、NGO 真實合作或試點。此版**不開放**真實學生／未成年服務使用者。
+- **Release Gate**：經 GitHub Actions、Netlify Deploy Preview、成人團隊桌面／手機驗收後先合併 `main`；Production 必須獨立核對 Published。
 
 ## v1.2 — NGO Activity Proposal Kit（青年活動構想／PPT 大綱）
 
@@ -106,9 +117,9 @@
 
 1. 到 [platform.openai.com/api-keys](https://platform.openai.com/api-keys) 建立 OpenAI API Key，確認 API billing／使用限額可用（**ChatGPT Plus 訂閱不等於 OpenAI API 額度**）。
 2. 到 [github.com/new](https://github.com/new) 建立**私人** Repository，例如 `miraclepaw-ai-demo`。
-3. 將這個資料夾內的檔案原封不動上傳到 GitHub Repo 根目錄。**不要上傳 `.env` 或任何真實 API Key。**
+3. 在目前 Repository 保留 `MiraclePaw_Netlify_AI_MVP_v0.1/` 專案資料夾結構，請勿將檔案擅自攤平或更改現有 Netlify 專案設定。**不要上傳 `.env` 或任何真實 API Key。**
 4. 到 [app.netlify.com](https://app.netlify.com) 登入，選 **Add new project / Import an existing project**（介面文字可能更新），連接該 GitHub Repo。
-5. Build 設定：**Base directory 留空**、**Build command 留空**、**Publish directory 填 `public`**；Functions 使用 `netlify.toml` 定義的 `netlify/functions`。
+5. Build 設定：現有 MiraclePaw Repository 的網站檔案位於 `MiraclePaw_Netlify_AI_MVP_v0.1/`，新建／重建站點時應先核對 Netlify **Base directory**、已生效 `netlify.toml` 路徑、**Publish directory `public`** 和 Functions 目錄；切勿直接照舊版「根目錄留空」設定覆蓋已運行站點。Build command 可按實際部署設定選擇。
 6. 先在 Netlify Project configuration／Environment variables 加入三個變數，**Scope 必須包含 Functions**：
 
    | Name | Value | 說明 |
@@ -191,4 +202,4 @@ MiraclePaw_Netlify_AI_MVP/
 - OpenAI Responses API: https://developers.openai.com/api/reference/resources/responses/methods/create
 - OpenAI Moderation: https://developers.openai.com/api/docs/guides/moderation
 
-版本：內部 MVP v0.9（2026-11-23）。原型已透過 GitHub/Netlify 建立部署流程；固定劇本及展示導覽唔需要 OpenAI API。**AI 真正對話仍須另外驗證 API 額度與安全性；唔係已驗證的未成年人或臨床服務。**
+版本：內部 MVP v1.3（2026-11-23，待 v1.3 PR 驗收及合併）。原型已透過 GitHub/Netlify 建立部署流程；固定劇本及展示導覽唔需要 OpenAI API。**AI 真正對話仍須另外驗證 API 額度與安全性；唔係已驗證的未成年人或臨床服務。**
