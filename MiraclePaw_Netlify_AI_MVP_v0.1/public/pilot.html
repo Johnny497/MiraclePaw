@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#eff5ee" />
+  <meta name="description" content="星爪 MiraclePaw v1.0 NGO Pilot Preparation：成年專業持份者使用嘅候審文件、風險登記、資料流、合作門檻與工作坊，僅以虛構資料討論，並非試點批准。" />
+  <title>星爪 MiraclePaw｜v1.0 NGO Pilot Preparation</title>
+  <link rel="stylesheet" href="/pilot.css" />
+  <script src="/pilot-preview.js"></script>
+  <script type="module" src="/pilot.js"></script>
+</head>
+<body>
+  <div class="pilot-shell">
+    <header class="pilot-header">
+      <a class="brand" href="/" aria-label="返回星爪主網站"><span class="mark" aria-hidden="true">🐾</span><span><strong>星爪 <em>MiraclePaw</em></strong><small>陪你慢慢嚟。</small></span></a>
+      <nav class="top-nav" aria-label="內部演示資源">
+        <a href="/pitch.html">3 分鐘 Pitch</a>
+        <a href="/review.html">演示 QA／FAQ</a>
+        <a href="/demo.html">固定劇本</a>
+        <a href="/">返回主頁</a>
+      </nav>
+    </header>
+
+    <main id="pilotMain" hidden>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">V1.0 · NGO PILOT PREPARATION · ADULT PROFESSIONAL REVIEW</span>
+          <h1>準備合作，<em>先準備好安全同信任。</em></h1>
+          <p>呢份係供獲邀成年 NGO／社工、私隱及安全專業人士討論嘅 <strong>試點準備包</strong>，唔係即時招募、正式合作協議、研究倫理批准或臨床安全認證。</p>
+          <div class="hero-actions">
+            <a class="primary-link" href="#readiness">查看六大準備關口</a>
+            <a href="/pitch.html">返回 NGO／HKSEC Pitch</a>
+            <a href="/demo.html">體驗五個虛構劇本</a>
+          </div>
+          <p class="microcopy">頁面只顯示預先編寫資料。無問卷、無個人資料收集、無 AI API、無帳號登入。成年人勾選唔係身份核實。</p>
+        </div>
+        <div class="cat-art" aria-label="橘白色小貓爪爪">
+          <img src="/miraclepaw-cat-tail.webp" width="640" height="585" alt="" aria-hidden="true" class="tail" />
+          <img src="/miraclepaw-cat-body.webp" width="640" height="585" alt="戴淺藍色頸巾嘅橘白色虛擬寵物爪爪" class="body" />
+          <span class="cat-bubble">慢慢嚟，先做足準備。</span>
+        </div>
+      </section>
+
+      <section class="status-grid" aria-label="目前項目成熟程度">
+        <div class="status-card"><span class="status-chip current">現有成果</span><h2>可操作成年展示原型</h2><p>寵物互動、虛構固定劇本、展示／Pitch 介面。</p></div>
+        <div class="status-card"><span class="status-chip discussion">建議中</span><h2>NGO 合作與專業評審</h2><p>框架同文件可討論；未有確認合作伙伴或書面授權。</p></div>
+        <div class="status-card"><span class="status-chip blocked">尚未獲批</span><h2>真人試點、未成年人使用</h2><p>冇倫理、安全、私隱及兒童保障批准，亦冇臨床效益證據。</p></div>
+      </section>
+
+      <section class="stop-banner" aria-labelledby="statusTitle">
+        <div class="stop-symbol" aria-hidden="true"><icon-placeholder>!</icon-placeholder></div>
+        <div><span class="eyebrow">GO / NO-GO · CURRENT DECISION</span><h2 id="statusTitle">目前狀態：NO-GO（不可啟動真實服務試點）</h2><p>即使你喺下面將六個「討論過」項目全部剔選，都<strong>唔會改變</strong>呢個決定。正式 Go 必須由適當機構同專業負責人獨立審批、具備書面證據及風險承接能力。</p></div>
+      </section>
+
+      <nav class="section-nav" aria-label="試點準備內容">
+        <a href="#readiness">準備關口</a><a href="#risks">風險登記</a><a href="#data">資料與權限</a><a href="#pilotOptions">合作分階段</a><a href="#workshop">會議工具</a><a href="#sources">官方參考</a>
+      </nav>
+
+      <section class="main-section" id="readiness" aria-labelledby="readinessTitle">
+        <div class="section-top">
+          <div><span class="eyebrow">01 · GOVERNANCE READINESS</span><h2 id="readinessTitle">六大試點準備關口</h2><p>每一項都有專業負責人、討論問題、需要嘅證據與停止條件。剔選只代表你喺呢次瀏覽器展示討論過，<strong>絕不代表已通過審核</strong>。</p></div>
+          <div class="check-counter"><strong id="reviewCount" role="status" aria-live="polite">已討論 0／6 項</strong><button id="resetPilot" type="button">重設討論記號</button></div>
+        </div>
+        <div class="readiness-grid" id="readinessList"></div>
+        <p class="small-note">冇上傳、冇保存剔選；重新整理即清除。所有關口都預設「未完成」，唔會因為開過網頁而變成「已批准」。</p>
+      </section>
+
+      <section class="main-section" id="risks" aria-labelledby="riskTitle">
+        <div class="section-top">
+          <div><span class="eyebrow">02 · PROVISIONAL RISK REGISTER</span><h2 id="riskTitle">待專業審閱嘅風險登記</h2><p>風險級別係初步保守標籤，唔係經獨立評分嘅正式風險矩陣。每項都包含示警、建議措施同停止動作。</p></div>
+          <label class="risk-filter" for="riskCategory">篩選議題
+            <select id="riskCategory"><option value="all">全部風險</option></select>
+          </label>
+        </div>
+        <div class="risks-grid" id="riskList"></div>
+        <p class="small-note" id="riskCount" role="status" aria-live="polite">顯示全部待審閱風險。</p>
+      </section>
+
+      <section class="main-section" id="data" aria-labelledby="dataTitle">
+        <div class="section-top"><div><span class="eyebrow">03 · DATA FLOW & ACCESS</span><h2 id="dataTitle">講清楚資料實際流向</h2><p>以下按 v0.9 程式碼整理，<strong>不等於已完成供應商日誌、平台留存或法規審核</strong>。未來權限係政策方向，唔係已存在嘅後台。</p></div></div>
+        <div class="privacy-spotlight"><strong>重要區分：</strong>心情紀錄只留喺本頁記憶體；但<strong>真 AI 聊天會經 Netlify Function 傳送文字及最近對話至 OpenAI API</strong>。供應商同部署平台嘅具體處理／留存安排，必須喺真實試點前逐項核對。</div>
+        <div class="data-grid" id="dataFlow"></div>
+        <h3 class="subheading">建議第三方權限邊界（尚未實作）</h3>
+        <div class="permission-grid" id="permissionList"></div>
+      </section>
+
+      <section class="main-section" id="pilotOptions" aria-labelledby="optionsTitle">
+        <div class="section-top"><div><span class="eyebrow">04 · CONDITIONAL COLLABORATION DESIGN</span><h2 id="optionsTitle">分三階段討論，而唔係即刻招募</h2><p>當前只建議由獲邀成年專業人士以虛構劇本評審。其後任何研究／接觸服務對象嘅決定，都要另行處理適用倫理、私隱、安全、同意及兒童保障審批。</p></div></div>
+        <div class="phase-grid" id="phaseList"></div>
+        <h3 class="subheading">阻止正式啟動嘅未解決事項</h3>
+        <ol class="blocker-list" id="blockerList"></ol>
+      </section>
+
+      <section class="main-section" id="workshop" aria-labelledby="workshopTitle">
+        <div class="section-top"><div><span class="eyebrow">05 · FACILITATED REVIEW</span><h2 id="workshopTitle">45 分鐘 NGO 專業交流工作坊</h2><p>建議會議流程，同意先討論風險及專業職責，再考慮其他步驟。呢個頁面唔會幫你自動保存會議記錄，請用 NGO 核准嘅渠道保管正式文件。</p></div></div>
+        <div class="agenda-list" id="agendaList"></div>
+        <div class="workshop-actions">
+          <a href="/demo.html?scene=small-steps">打開拒絕外出劇本</a>
+          <a href="/demo.html?scene=safety">檢查危機資源劇本</a>
+          <a href="/review.html">檢查展示 QA／FAQ</a>
+          <button id="printPilot" type="button">列印／另存空白準備包</button>
+        </div>
+        <p class="small-note">列印會包含目前顯示嘅討論資料，但唔會建立審批紀錄；任何正式簽署／批准須在 NGO 核准文件系統另行處理。</p>
+      </section>
+
+      <section class="main-section" id="sources" aria-labelledby="sourcesTitle">
+        <div class="section-top"><div><span class="eyebrow">06 · REFERENCE NOT CERTIFICATION</span><h2 id="sourcesTitle">香港官方參考資料</h2><p>提供俾專業顧問作背景閱讀，未有任何官方機構確認、認證或者批准星爪。適用法規解讀須由合資格人士按實際試點方案處理。</p></div></div>
+        <div class="sources-list" id="sourceList"></div>
+      </section>
+
+      <footer class="pilot-footer">MiraclePaw 星爪 · v1.0 NGO Pilot Preparation · 成年專業持份者內部討論 · 無真人招募、臨床評估、已獲批准試點或未成年服務</footer>
+    </main>
+
+    <div id="pilotGate" class="adult-gate" role="dialog" aria-modal="true" aria-labelledby="pilotGateTitle">
+      <div class="gate-card">
+        <div class="gate-cat" aria-hidden="true">🐱</div>
+        <span class="eyebrow">NGO PILOT PREPARATION · ADULT STAKEHOLDER ONLY</span>
+        <h2 id="pilotGateTitle">準備好，一齊審視風險先。</h2>
+        <p>你即將開啟嘅係供成年 NGO／社工、私隱、安全顧問同團隊內部討論嘅 <strong>候審準備文件</strong>。呢頁唔係試點登記、合作合約或者使用者評估。</p>
+        <div class="gate-warning"><strong>重要限制：</strong>尚未有 NGO 正式合作、倫理批准、危機安全驗證、真實健康成效或者未成年人使用資格。請勿輸入真人個案、醫療資料或姓名；網頁無收集表格。勾選並非年齡／資格核實。</div>
+        <label class="adult-checkbox"><input type="checkbox" id="pilotAdult" /><span>我係成年人，明白只可用虛構資料討論，任何剔選都唔等於專業審批或正式試點許可。</span></label>
+        <button id="enterPilot" type="button" disabled>進入 v1.0 準備包 →</button>
+        <a class="gate-back" href="/pitch.html">返回 v0.9 Pitch Mode</a>
+      </div>
+    </div>
+    <noscript><p class="noscript">此頁須啟用 JavaScript；無需 OpenAI API。只供獲邀成年持份者檢視。</p></noscript>
+  </div>
+</body>
+</html>
