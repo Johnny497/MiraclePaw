@@ -1,8 +1,20 @@
-# 星爪 MiraclePaw — Netlify Web App（內部 MVP v0.9）
+# 星爪 MiraclePaw — Netlify Web App（內部 MVP v1.0）
 
 > **用途：** 內部團隊及**成年** NGO／社工持份者試玩展示，並非已完成安全驗證的未成年人產品；不能用於緊急求助、醫療診斷或治療。
 
 這份專案由零建立，採用 **純 HTML / CSS / JavaScript + Netlify Functions + OpenAI Responses API**，不需要資料庫，也不必預先安裝 React。
+
+## v1.0 — NGO Pilot Preparation（成年專業持份者候審包）
+
+- **新入口**：`/pilot.html`。由主頁、v0.7 評審導覽、v0.8 QA 及 v0.9 Pitch 直接進入。
+- **候審資料**：六大治理關口、八項初步風險、真實代碼資料流、未來家長／NGO 權限方向、分三階段合作方案與 45 分鐘交流工作坊。
+- **文件**：`docs/NGO_PILOT_PREPARATION_v1_0.md`；含現有功能與未完成審批清單、NO-GO 原則、風險及正式會議紀錄建議。
+- **準備 ≠ 試點批准**：所有關口預設未完成；「已討論」剔選只存本頁記憶體，無分數、無資料庫，唔會解鎖 Go、真實招募或未成年人功能。
+- **真實私隱界線**：本頁本身純靜態、無 API；現有 `mood.js` 心情係頁面記憶體；但主網站選用真 AI 聊天時會將當次訊息與部分上下文經 Netlify Function 交 OpenAI API，`store:false` 唔等於已核證所有供應商／平台日誌。相關資料流、保留、同意與權限尚待獨立審查。
+- **持續原則**：不因不出門／拒絕而懲罰；禁止強制配對或真人即時定位；危機保持陪伴及顯示香港熱線，不暗中聯絡第三方；家長／NGO 後台尚未實作、任何第三方不得查看對話原文；基本陪伴免費、無廣告／付費牆。
+- **安全範圍**：成年專業持份者虛構資料審閱，唔係未成年人產品、醫療或正式危機介入；尚未有確認 NGO 協議／倫理批准／臨床成效。任何準備頁的專業判斷仍須在合作機構認可渠道作正式紀錄。
+- **Preview**：`pilot-preview.js` 只為 Netlify Deploy Preview 加上官方 `ntl-drawer-state=hidden` 參數，係 CSP 容許嘅同源外部 script，不影響 Production。
+- **發布原則**：先通過 `npm test` 同 Netlify Preview、成年團隊實際桌面／手機驗收；未確認唔合併 `main`。
 
 ## v0.9 — NGO／HKSEC Pitch Ready（成年持份者演示）
 
