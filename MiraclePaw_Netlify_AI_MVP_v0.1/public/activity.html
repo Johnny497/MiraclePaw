@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="theme-color" content="#eff5ee"/>
+  <meta name="description" content="MiraclePaw v1.2 NGO Activity Proposal Kit：供成年專業持份者討論青年社區、就業技能及健康三個假設性主題、八頁簡報大綱與資源安全要求，非已落實或批准活動。"/>
+  <title>星爪 MiraclePaw｜v1.2 NGO Activity Proposal Kit</title>
+  <link rel="stylesheet" href="/pilot.css"/>
+  <link rel="stylesheet" href="/activity.css"/>
+  <script src="/pilot-preview.js"></script>
+  <script type="module" src="/activity.js"></script>
+</head>
+<body>
+  <div class="pilot-shell">
+    <header class="pilot-header">
+      <a class="brand" href="/" aria-label="返回星爪主頁"><span class="mark" aria-hidden="true">🐾</span><span><strong>星爪 <em>MiraclePaw</em></strong><small>陪你慢慢嚟。</small></span></a>
+      <nav class="top-nav" aria-label="展示工具">
+        <a href="/partners.html">NGO 合作工具</a>
+        <a href="/pilot.html">試點安全關口</a>
+        <a href="/pitch.html">3 分鐘 Pitch</a>
+        <a href="/demo.html">虛構劇本</a>
+        <a href="/">主頁</a>
+      </nav>
+    </header>
+
+    <main id="activityMain" hidden>
+      <section class="hero activity-hero">
+        <div class="hero-copy">
+          <span class="eyebrow">MIRACLEPAW V1.2 · NGO ACTIVITY PROPOSAL KIT</span>
+          <h1>由議題出發，<em>整理一份負責任嘅活動構想。</em></h1>
+          <p>參考你提供嘅青年活動簡報結構，同專業持份者討論<strong>社區參與、就業／技能、健康／情緒</strong>三個方向。你可以切換主題、睇八頁簡報大綱、複製文字及列印。<strong>內容係建議方案，並非星爪已完成實地考察、已獲 NGO 合作或活動成果。</strong></p>
+          <div class="hero-actions">
+            <a class="primary-link" href="#outline">開始整理八頁大綱</a>
+            <a href="/partners.html">返回合作邀請</a>
+            <a href="/pilot.html">查看 NO-GO 關口</a>
+          </div>
+          <p class="microcopy">本頁唔接受上傳工作紙或相片、唔聯絡任何 NGO、唔傳送個人資料、唔呼叫 AI API。真正製作 PPT 需團隊人手審核。</p>
+        </div>
+        <div class="cat-art" aria-label="橘白色小貓爪爪">
+          <img class="tail" src="/miraclepaw-cat-tail.webp" width="640" height="585" alt="" aria-hidden="true"/>
+          <img class="body" src="/miraclepaw-cat-body.webp" width="640" height="585" alt="橘白小貓爪爪戴淺藍色頸巾"/>
+          <span class="cat-bubble">你嘅想法值得慢慢整理。</span>
+        </div>
+      </section>
+
+      <div class="status-grid">
+        <div class="status-card"><span class="status-chip current">可以討論</span><h2>三個假設性青年議題</h2><p>社區參與、技能學習、情緒／健康；唔當作真實需求調查。</p></div>
+        <div class="status-card"><span class="status-chip discussion">可以整理</span><h2>八頁 PPT 文字大綱</h2><p>固定模板由你人手複製，唔聲稱已自動生成 PowerPoint。</p></div>
+        <div class="status-card"><span class="status-chip blocked">仍然 NO-GO</span><h2>真人活動與服務試點</h2><p>未有合作協議、安全、倫理、資料及未成年保障批准。</p></div>
+      </div>
+
+      <section class="stop-banner" aria-labelledby="activityStatus">
+        <div class="stop-symbol" aria-hidden="true"><span>!</span></div>
+        <div>
+          <span class="eyebrow">DISCUSSION ONLY · SAFETY & EVIDENCE</span>
+          <h2 id="activityStatus" tabindex="-1">NO-GO：活動建議不等於已獲批准嘅 NGO 試點</h2>
+          <p>圖片例子可以啟發討論，但唔可以直接稱其中地點為星爪嘅考察成果、機構伙伴或已獲授權嘅實地安排。未取得適用授權及同意前，唔好公開使用他人活動照片，亦唔可以招募學生或服務使用者。</p>
+        </div>
+      </section>
+
+      <section class="main-section" id="outline" aria-labelledby="outlineTitle">
+        <div class="section-top">
+          <div><span class="eyebrow">01 · THEME & EIGHT-SLIDE OUTLINE</span><h2 id="outlineTitle">揀一個主題，整理八頁建議簡報</h2><p>頁面只提供固定、預先編寫嘅概念草稿，無真實觀察、受訪者或成效數據。你可以先用嚟討論，再按經核實資料修改。</p></div>
+        </div>
+        <div class="activity-tabs" role="group" aria-label="選擇青年議題">
+          <button id="themeCommunity" type="button" data-topic="community" aria-pressed="true">🌱 青年社區參與</button>
+          <button id="themeEmployment" type="button" data-topic="employment" aria-pressed="false">💡 青年就業／技能</button>
+          <button id="themeHealth" type="button" data-topic="health" aria-pressed="false">🫶 青年健康／情緒</button>
+        </div>
+        <div class="topic-intro">
+          <div><span class="eyebrow" id="topicEnglish">COMMUNITY PARTICIPATION</span><h3 id="topicTitle">青年社區參與</h3><p id="topicTagline"></p></div>
+          <span class="nonbinding-mark">建議中 · 未考察 · 未批准</span>
+        </div>
+        <div id="slideList" class="slide-list" aria-label="八頁簡報建議內容"></div>
+        <div class="outline-actions">
+          <button id="copyOutline" type="button" class="primary-action">複製完整八頁大綱</button>
+          <button id="printOutline" type="button">列印／另存大綱</button>
+          <button id="resetTheme" type="button">返回第一個主題</button>
+        </div>
+        <p id="outlineStatus" class="small-note" role="status" aria-live="polite">尚未複製或匯出。頁面唔會自動生成 .pptx 或記錄活動資料。</p>
+      </section>
+
+      <section class="main-section" id="questions" aria-labelledby="questionsTitle">
+        <div class="section-top"><div><span class="eyebrow">02 · FOUR QUESTIONS</span><h2 id="questionsTitle">四條問題，幫你避開空泛簡報</h2><p>參考你上傳嘅青年活動簡報問法，先提出問題，再確定咩係未有證據嘅假設。</p></div></div>
+        <ol id="questionList" class="question-grid"></ol>
+      </section>
+
+      <section class="main-section" id="workflow" aria-labelledby="workflowTitle">
+        <div class="section-top"><div><span class="eyebrow">03 · RESPONSIBLE AI + PPT WORKFLOW</span><h2 id="workflowTitle">工作紙 → 大綱 → 圖片 → PPT → 事實核對</h2><p>AI 可以協助整理，但唔會代替你觀察、確認相片授權同查證研究。本版只產生文字大綱，<strong>唔處理任何上傳圖片或真正建立 PPT 檔</strong>。</p></div></div>
+        <div id="workflowList" class="workflow-grid"></div>
+      </section>
+
+      <section class="main-section" id="boundaries" aria-labelledby="boundariesTitle">
+        <div class="section-top"><div><span class="eyebrow">04 · ACTIVITIES MUST REMAIN VOLUNTARY</span><h2 id="boundariesTitle">討論活動前要講清楚嘅底線</h2><p>唔可以因為有靚 PPT 或活動相片，就將一個未經安全審查嘅概念當成真正服務。</p></div></div>
+        <div class="boundary-cards">
+          <article><h3>自主與拒絕</h3><p id="topicSafety"></p><p>唔出門、唔參與、唔交流，都唔會受到懲罰或失去虛擬寵物陪伴。</p></article>
+          <article><h3>資源與合作責任</h3><p id="topicResource"></p><p>未有正式 NGO 分工、私隱／倫理及安全批准前，只可以同成年專業人士用虛構資料討論。</p></article>
+          <article><h3>對應虛構劇本</h3><p id="topicSample"></p><a id="topicDemo" href="/demo.html?scene=small-steps">查看固定劇本 ↗</a><p>劇本唔係真實服務使用者個案，亦唔係已驗證有效嘅心理支援。</p></article>
+        </div>
+      </section>
+      <footer class="pilot-footer">MiraclePaw 星爪 v1.2 · 只供成年專業持份者嘅概念活動簡報工具 · 無 NGO 合作聲明、真實考察／療效數據、學生招募或正式活動批准</footer>
+    </main>
+
+    <div id="activityGate" class="adult-gate" role="dialog" aria-modal="true" aria-labelledby="activityGateTitle">
+      <div class="gate-card">
+        <div class="gate-cat" aria-hidden="true">🐱</div>
+        <span class="eyebrow">MIRACLEPAW V1.2 · ADULT STAKEHOLDER DISCUSSION ONLY</span>
+        <h2 id="activityGateTitle">先確認，呢份係活動構想。</h2>
+        <p>你會見到三個青年議題嘅建議方向同 PPT 文字大綱。全部都係虛構案例及有待驗證假設，唔係圖片中場地／主辦方對星爪嘅合作或認可。</p>
+        <div class="gate-warning"><strong>NO-GO：</strong>星爪仍未獲任何真人服務試點、未成年使用、危機安全或倫理批准；此頁無資料上傳、無自動發信、無真實活動登記。勾選唔係身份驗證或批准。</div>
+        <label class="adult-checkbox"><input id="activityAdult" type="checkbox"/><span>我係成年人，明白只用虛構內容做專業討論，不會將圖片示例當作真實合作及活動證據。</span></label>
+        <button id="enterActivity" type="button" disabled>進入活動建議工具 →</button>
+        <a class="gate-back" href="/partners.html">返回 NGO Partnership Toolkit</a>
+      </div>
+    </div>
+    <noscript><p class="noscript">此頁需要 JavaScript，唔需要 AI API。只供獲邀成年持份者以虛構案例參考。</p></noscript>
+  </div>
+</body>
+</html>
