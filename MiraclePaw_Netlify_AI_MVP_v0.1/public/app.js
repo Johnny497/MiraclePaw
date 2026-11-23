@@ -8,6 +8,7 @@
   const gate = $('gate');
   const gateForm = $('gateForm');
   const crisisNotice = $('crisisNotice');
+  const aiFallback = $('aiFallback');
   const status = $('connectionStatus');
   const maxTurns = 20;
   const history = []; // In-memory only: not stored in localStorage or on our server.
@@ -59,6 +60,7 @@
     const message = text.trim();
     if (!demoPasscode || sending || !message || count >= maxTurns) return;
     count += 1;
+    if (aiFallback) aiFallback.hidden = true;
     addMessage('user', message);
     input.value = '';
     input.style.height = 'auto';
@@ -101,7 +103,8 @@
       else $('petSpeech').textContent = '多謝你同我分享 🌼';
     } catch (error) {
       pending.remove();
-      addMessage('system', error instanceof Error ? error.message : '暫時連線失敗，請再試一次。');
+      if (aiFallback) aiFallback.hidden = false;
+      addMessage('system', error instanceof Error ? error.message : '暫時連線失敗，請先使用免費固定劇本。');
       if (/密碼/.test(String(error?.message))) $('connectionStatus').textContent = '密碼錯誤，請按 ↻ 重新輸入';
     } finally {
       setBusy(false);
@@ -164,8 +167,9 @@
   $('skipStep').addEventListener('click', () => {
     $('stepStatus').textContent = '今日唔出去完全可以。爪爪一樣陪住你。';
     $('petSpeech').textContent = '今日休息都得 🫶';
-    if (demoPasscode) send('我今日唔想出門，唔想做任務，你可唔可以照樣陪我傾偈？');
-    else addMessage('system', '完成試玩確認之後，就可以同爪爪傾偈。');
+    // A refusal must not trigger an unwanted network message or use AI credits.
+    // Local reassurance is always available, even before demo passcode entry.
+    addMessage('assistant', '今日留喺度都完全可以，唔需要交功課。爪爪一樣陪住你 🤍');
   });
   $('petHello').addEventListener('click', () => {
     const msg = $('petHelloMessage');
@@ -179,6 +183,7 @@
     messages.replaceChildren();
     addMessage('assistant', '你好呀，我係爪爪！🍀 新一段對話開始啦。');
     crisisNotice.hidden = true;
+    if (aiFallback) aiFallback.hidden = true;
     demoPasscode = '';
     $('agree').checked = false;
     gate.hidden = false;
