@@ -96,7 +96,7 @@ export default async function handler(request) {
   if (process.env.AI_CHAT_DISABLED === 'true') {
     return json({
       code: 'AI_DISABLED',
-      error: 'AI 對話暫時由管理員關閉。爪爪基本陪伴同五個免費固定劇本仍然可以使用。',
+      error: `AI 對話暫時由管理員關閉。爪爪基本陪伴同五個免費固定劇本仍然可以使用。如有即時危險請打香港 999；亦可自行聯絡 ${HOTLINES}。`,
     }, 503);
   }
 
