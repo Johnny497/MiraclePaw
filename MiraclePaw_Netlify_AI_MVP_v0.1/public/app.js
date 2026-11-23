@@ -43,6 +43,7 @@
     sendButton.disabled = input.disabled;
     if (value) status.textContent = '爪爪諗緊點樣回覆你…';
     else if (count >= maxTurns) status.textContent = '今次試玩到達上限，請按右上角重新開始';
+    else if (!demoPasscode) status.textContent = '免費本地陪伴模式 · AI 對話未啟用';
     else status.textContent = '已準備傳送，首次訊息將驗證連線';
   }
 
@@ -136,6 +137,22 @@
     input.focus();
   });
 
+  // Local-only entry still requires the adult internal-demo acknowledgment, but never a passcode or API call.
+  $('localEntry')?.addEventListener('click', () => {
+    if (!$('agree').checked) {
+      $('gateError').textContent = '請先確認你係成年人，並只使用虛構、非敏感嘅內部測試資料。';
+      $('gateError').hidden = false;
+      return;
+    }
+    demoPasscode = '';
+    $('passcode').value = '';
+    $('gateError').hidden = true;
+    gate.hidden = true;
+    gate.setAttribute('aria-hidden', 'true');
+    setBusy(false);
+    ($('tourStart') || $('petTouch'))?.focus();
+  });
+
   chatForm.addEventListener('submit', (event) => {
     event.preventDefault();
     send(input.value);
@@ -171,13 +188,17 @@
     selectedStep = '';
     $('doneStep').disabled = true;
   });
-  $('skipStep').addEventListener('click', () => {
+  function reassureNoOuting() {
     $('stepStatus').textContent = '今日唔出去完全可以。爪爪一樣陪住你。';
     $('petSpeech').textContent = '今日休息都得 🫶';
     // A refusal must not trigger an unwanted network message or use AI credits.
     // Local reassurance is always available, even before demo passcode entry.
     addMessage('assistant', '今日留喺度都完全可以，唔需要交功課。爪爪一樣陪住你 🤍');
-  });
+  }
+  $('skipStep').addEventListener('click', reassureNoOuting);
+  document.querySelectorAll('[data-local-companion]').forEach((button) =>
+    button.addEventListener('click', reassureNoOuting)
+  );
   $('petHello').addEventListener('click', () => {
     const msg = $('petHelloMessage');
     msg.textContent = '🐱 豆豆（虛構寵物）：Hi 爪爪！今日見到一朵好靚嘅雲 ☁️。呢段係純模擬嘅寵物互動，唔涉及真人配對、定位或資料分享。你可以完全唔跟進。';
