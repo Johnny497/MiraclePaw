@@ -121,7 +121,7 @@ export const PROPOSED_MEASURES = Object.freeze([
   {
     id:'privacy', title:'資料流向與權限', category:'私隱',
     method:'提議逐項審核邊啲資料會傳送、記錄、保留或被第三方存取；確認冇真人位置及對話原文第三方閱覽。',
-    caveat:'現時冇完整正式服務資料流審核或合規認證。'
+    caveat:'尚未完成正式服務資料流審核或合規認證。'
   },
   {
     id:'comfort', title:'自願使用舒適度', category:'體驗',
