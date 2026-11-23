@@ -128,3 +128,34 @@ test('reset hides fallback and reopens consent/password gate',async()=>{
   assert.equal(e.agree.checked,false);
   assert.equal(s.requests.length,1);
 });
+
+test('Netlify native 429 with non-JSON HTML is handled without retrying or leaking HTML',async()=>{
+  const s=simulate(async()=>new Response('<html>edge limit</html>',{status:429,headers:{'Content-Type':'text/html'}}));
+  const e=s.e;
+  s.unlock();
+  e.userInput.value='你好呀';
+  e.chatForm.fire('submit');
+  await settle();
+  assert.equal(s.requests.length,1);
+  assert.equal(e.aiFallback.hidden,false);
+  const rows=e.messages.children.filter(row=>row.className==='message system');
+  assert.equal(rows.length,1);
+  assert.match(rows[0].children[0].textContent,/請求太密集/);
+  assert.doesNotMatch(rows[0].children[0].textContent,/<html>|edge limit/);
+  assert.equal(e.sendButton.disabled,false);
+});
+
+test('operator disabled response still shows static backup and does not auto-retry',async()=>{
+  const s=simulate(async()=>new Response(JSON.stringify({
+    code:'AI_DISABLED',
+    error:'AI 對話暫時由管理員關閉。五個免費固定劇本可以使用。'
+  }),{status:503,headers:{'Content-Type':'application/json'}}));
+  s.unlock();
+  s.e.userInput.value='你好';
+  s.e.chatForm.fire('submit');
+  await settle();
+  assert.equal(s.requests.length,1);
+  assert.equal(s.e.aiFallback.hidden,false);
+  const rows=s.e.messages.children.filter(row=>row.className==='message system');
+  assert.match(rows[0].children[0].textContent,/管理員關閉/);
+});

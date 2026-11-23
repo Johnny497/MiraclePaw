@@ -90,6 +90,16 @@ function extractText(response) {
 export default async function handler(request) {
   if (request.method !== 'POST') return json({ error: '只接受 POST 請求。' }, 405);
 
+  // Operator-controlled kill switch. Set AI_CHAT_DISABLED=true in Netlify
+  // environment variables to stop all upstream AI requests immediately.
+  // This does not disable the free kitten or static scripted demonstrations.
+  if (process.env.AI_CHAT_DISABLED === 'true') {
+    return json({
+      code: 'AI_DISABLED',
+      error: `AI 對話暫時由管理員關閉。爪爪基本陪伴同五個免費固定劇本仍然可以使用。如有即時危險請打香港 999；亦可自行聯絡 ${HOTLINES}。`,
+    }, 503);
+  }
+
   const key = process.env.OPENAI_API_KEY;
   const passcode = process.env.DEMO_PASSCODE;
   if (!key || !passcode || passcode.length < 12) {
@@ -172,4 +182,16 @@ export default async function handler(request) {
   }
 }
 
-export const config = { path: '/api/chat' };
+// Native Netlify edge-enforced function rate limiting (NOT an in-memory counter).
+// Netlify validates these rules at deploy post-processing. Inspect deploy logs;
+// a green deployment alone does not prove a rate-limit rule was accepted.
+// Limits apply to incoming requests (including invalid passcodes) and help
+// protect the optional AI service without penalizing free static interactions.
+export const config = {
+  path: '/api/chat',
+  rateLimit: {
+    windowLimit: 6,
+    windowSize: 60,
+    aggregateBy: ['ip', 'domain'],
+  },
+};

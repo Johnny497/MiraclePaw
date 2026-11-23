@@ -92,8 +92,15 @@
         body: JSON.stringify({ message, history: history.slice(-12) }),
         cache: 'no-store',
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || `連線失敗（${response.status}）`);
+      // Netlify's native rate limiter may send a bare 429 with HTML or no JSON.
+      // Handle it before parsing, show the free static fallback, never auto-retry.
+      if (response.status === 429) {
+        throw new Error('AI 試玩請求太密集，請稍後再試；爪爪基本陪伴同免費固定劇本一直都可以使用。');
+      }
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || 'AI 暫時唔可用。你可以先用免費固定劇本，唔需要連續重試。');
+      }
       const reply = String(result.reply || '').trim();
       if (!reply) throw new Error('AI 回覆為空，請稍後重試。');
       pending.remove();
