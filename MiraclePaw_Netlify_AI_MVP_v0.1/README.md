@@ -1,8 +1,17 @@
-# 星爪 MiraclePaw — Netlify Web App（內部 MVP v1.3）
+# 星爪 MiraclePaw — Netlify Web App（內部 MVP v1.4）
 
 > **用途：** 內部團隊及**成年** NGO／社工持份者試玩展示，並非已完成安全驗證的未成年人產品；不能用於緊急求助、醫療診斷或治療。
 
 這份專案由零建立，採用 **純 HTML / CSS / JavaScript + Netlify Functions + OpenAI Responses API**，不需要資料庫，也不必預先安裝 React。
+
+## v1.4 — Native AI Rate Limiting & Cost Guardrails（成年內部測試）
+
+- **Netlify 原生 Function Rate Limit**：`netlify/functions/chat.mjs` 嘅 `config.rateLimit` 限制 `/api/chat` 每 IP + domain **60 秒 6 次**，超額由 Netlify 回 HTTP 429；無使用本機記憶體計數、外部資料庫或個人 IP 蒐集。必須喺 Netlify post-processing Deploy log 確認規則**確實套用**，單憑綠色部署唔夠。
+- **管理員 AI 緊急停用**：在 Netlify 環境變數設定 `AI_CHAT_DISABLED=true`，Function 在上游 AI 請求前返回 `AI_DISABLED`（503）及免費劇本／香港求助熱線。環境變數變更何時生效要按 Netlify 設定及部署另行核實；不改基本寵物陪伴。
+- **HTTP 429 前端備援**：Netlify 可能直接返回非 JSON 嘅 429；前端會先辨識、唔自動重試、提示可使用免費固定劇本。原有 429／超時／Moderation fail-closed 測試仍保留。
+- **成本界線**：`max_output_tokens: 420` 維持現有單次模型輸出上限；Netlify 每 IP 限流**唔係**所有來源共用嘅每日 USD／HKD 支出硬上限，未建立平台級總成本封頂或正式身份系統。需另外由有權限營運人員核實供應商帳戶預算、告警同必要嘅全球共享配額方案。
+- **測試**：`tests/rate-limits.test.mjs` 及擴充 `tests/frontend-hardening.test.mjs`；全部 Mock，唔發真實 OpenAI API 請求或花費額度。完整操作與尚未滿足嘅條件見 `docs/AI_RATE_LIMIT_COST_GUARDRAILS_v1_4.md`。
+- **NO-GO**：NGO 真實服務、未成年人、臨床／危機安全及私隱／倫理審核仍未完成。先經 Draft PR CI、Netlify Preview 日誌及使用者畫面驗收，未經批准不合併 `main`。
 
 ## v1.3 — Product Hardening & Evidence Pack（內部驗證，不是臨床或安全認證）
 
