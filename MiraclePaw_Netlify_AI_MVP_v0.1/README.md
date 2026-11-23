@@ -1,8 +1,14 @@
-# 星爪 MiraclePaw — Netlify Web App（內部 MVP v1.4）
+# 星爪 MiraclePaw — Netlify Web App（內部 MVP v1.5）
 
 > **用途：** 內部團隊及**成年** NGO／社工持份者試玩展示，並非已完成安全驗證的未成年人產品；不能用於緊急求助、醫療診斷或治療。
 
 這份專案由零建立，採用 **純 HTML / CSS / JavaScript + Netlify Functions + OpenAI Responses API**，不需要資料庫，也不必預先安裝 React。
+
+## v1.5 — 免費本地陪伴導覽（僅供成年內部 Demo）
+- 首頁新增四段自願導覽：寵物互動、心情分享、自願微步、虛構寵物打招呼；每段可略過，純本地操作，不會自動觸發 API 請求或儲存導覽進度。
+- 增加「唔連 AI，先體驗免費陪伴」入口；需先勾選成年內部測試確認，但**唔需要付費／API 密碼**就可以玩寵物、心情、微步與導覽。
+- 「唔想出門」聊天建議改為本地安慰，不需 AI、不扣分；真 AI 聊天仍需原有成人試玩確認與密碼。
+- 保留 v1.4 Netlify 原生限流、AI 緊急停用、fail-closed 與危機資源。唔可作正式未成年或 NGO 服務，詳見 `docs/MVP_DEMO_EXPERIENCE_v1_5.md`。
 
 ## v1.4 — Native AI Rate Limiting & Cost Guardrails（成年內部測試）
 

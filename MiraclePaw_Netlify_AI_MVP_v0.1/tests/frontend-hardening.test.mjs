@@ -11,7 +11,7 @@ const ids=[
   'messages','chatForm','userInput','sendButton','gate','gateForm',
   'crisisNotice','aiFallback','connectionStatus','petSpeech',
   'stepStatus','doneStep','skipStep','petHello','petHelloMessage',
-  'resetChat','agree','passcode','gateError'
+  'resetChat','agree','passcode','gateError','localEntry','tourStart'
 ];
 class Element {
   constructor(tag='div'){
@@ -49,7 +49,8 @@ function simulate(fetchImpl=async()=>new Response(JSON.stringify({error:'AI 暫�
   e.aiFallback.hidden=true;
   e.crisisNotice.hidden=true;
   e.gateError.hidden=true;
-  const allButtons={'[data-prompt]':[],'[data-step]':[]};
+  const localCompanion = new Element('local-companion');
+  const allButtons={'[data-prompt]':[],'[data-step]':[],'[data-local-companion]':[localCompanion]};
   const document={
     getElementById:id=>e[id]??null,
     createElement:tag=>new Element(tag),
@@ -59,7 +60,7 @@ function simulate(fetchImpl=async()=>new Response(JSON.stringify({error:'AI 暫�
   const fetch=async (...args)=>{requests.push(args);return await fetchImpl(...args);};
   vm.runInNewContext(app,{document,fetch,Error},{filename:'app.js'});
   return {
-    e,requests,
+    e,requests,localCompanion,
     unlock(){e.agree.checked=true;e.passcode.value='mock-passcode-at-least-12-chars';e.gateForm.fire('submit');}
   };
 }
@@ -158,4 +159,33 @@ test('operator disabled response still shows static backup and does not auto-ret
   assert.equal(s.e.aiFallback.hidden,false);
   const rows=s.e.messages.children.filter(row=>row.className==='message system');
   assert.match(rows[0].children[0].textContent,/管理員關閉/);
+});
+
+test('free local companion requires adult acknowledgment but no passcode, no AI traffic',()=>{
+  const s=simulate(),e=s.e;
+  e.localEntry.fire('click');
+  assert.equal(e.gate.hidden,false,'Age and fictional-data acknowledgement required');
+  assert.match(e.gateError.textContent,/成年人/);
+  e.agree.checked=true;
+  e.localEntry.fire('click');
+  assert.equal(e.gate.hidden,true);
+  assert.equal(e.userInput.disabled,true);
+  assert.equal(e.sendButton.disabled,true);
+  assert.match(e.connectionStatus.textContent,/AI 對話未啟用/);
+  assert.equal(s.requests.length,0);
+  e.skipStep.fire('click');
+  assert.equal(s.requests.length,0);
+  assert.match(e.petSpeech.textContent,/休息都得/);
+  e.resetChat.fire('click');
+  assert.equal(e.gate.hidden,false);
+  assert.equal(e.agree.checked,false);
+});
+
+test('no-outing suggestion is a local reassurance even when AI is available',()=>{
+  const s=simulate(),e=s.e;
+  s.unlock();
+  s.localCompanion.fire('click');
+  assert.equal(s.requests.length,0);
+  assert.match(e.stepStatus.textContent,/唔出去完全可以/);
+  assert.match(e.messages.children.at(-1).children[0].textContent,/一樣陪住/);
 });
