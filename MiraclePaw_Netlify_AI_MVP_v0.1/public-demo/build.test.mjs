@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile, readdir } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
+const here = import.meta.dirname;
+test('build emits only an allowlisted static public site with no AI surface', async () => {
+  execFileSync(process.execPath, ['build.mjs'], { cwd: here, stdio: 'pipe' });
+  const files = (await readdir(join(here, 'dist'))).sort();
+  assert.deepEqual(files, ['index.html','local-demo.js','miraclepaw-cat-body.webp','miraclepaw-cat-eyesclosed.webp','miraclepaw-cat-tail.webp','mood.js','pet.js','styles.css','tour.js'].sort());
+  const html = await readFile(join(here, 'dist/index.html'), 'utf8');
+  assert.match(html, /四段陪伴小旅程/);
+  assert.match(html, /id="moodCheckin"/);
+  assert.match(html, /id="petHello"/);
+  assert.match(html, /2389 2222/);
+  assert.doesNotMatch(html, /app\.js|\/api\/chat|passcode|<form|<textarea|openai\.com|netlify\/functions/i);
+  const local = await readFile(join(here, 'dist/local-demo.js'), 'utf8');
+  assert.doesNotMatch(local, /fetch\s*\(|XMLHttpRequest|sendBeacon|localStorage|sessionStorage|geolocation/i);
+  const config = await readFile(join(here, 'netlify.toml'), 'utf8');
+  assert.match(config, /connect-src 'none'/);
+});
