@@ -35,7 +35,7 @@ test('DeepSeek test route is not called by frontend',()=>{
  assert.doesNotMatch(app,/\/api\/deepseek-test/);
  assert.doesNotMatch(html,/\/api\/deepseek-test/);
 });
-test('KNOWN BLOCKER: OpenAI chat route lacks independent output moderation',()=>{
+test('OpenAI chat route now requires independent output moderation',()=>{
  const model=api.indexOf("const response = await openai('responses'");
  assert.ok(model>0);
  const after=api.slice(model);
