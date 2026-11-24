@@ -167,6 +167,23 @@ export default async function handler(request) {
     if (!reply) throw new Error('Empty model response');
     // Conservative output keyword check; NOT a comprehensive or clinical safety test.
     if (looksLikeCrisis(reply)) return json({ reply: crisisReply, crisis: true });
+    // Phase 4C-6: independent output moderation. Fail closed on missing or malformed verdict.
+    // This is a second API call, separate from the model generation request.
+    const outputModeration = await openai('moderations', {
+      model: 'omni-moderation-latest',
+      input: reply,
+    }, key);
+    const outputResult = outputModeration?.results?.[0];
+    if (typeof outputResult?.flagged !== 'boolean' || !outputResult.categories) {
+      throw new Error('Output moderation result missing');
+    }
+    const outputCategories = outputResult.categories;
+    if (outputResult.flagged || outputCategories['self-harm'] ||
+        outputCategories['self-harm/intent'] ||
+        outputCategories['self-harm/instructions'] ||
+        outputCategories.violence || outputCategories['violence/graphic']) {
+      return json({ reply: crisisReply, crisis: true });
+    }
     return json({ reply: reply.slice(0, 1600), crisis: false });
   } catch (error) {
     // No raw user text, conversation history, API keys or upstream bodies in logs.
