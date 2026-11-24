@@ -24,7 +24,7 @@ test('UI offers an API error fallback and does not auto-retry',()=>{
 });
 test('model response is displayed only after server success (not independent proof of safety)',()=>{
  assert.match(app,/if \(!response\.ok\)/);
- assert.match(app,/addMessage\('assistant', reply\)/);
+ assert.match(app,/addMessage\('assistant', decision\.text\)/);
 });
 test('operator kill switches exist in BOTH server functions',()=>{
  assert.match(api,/AI_CHAT_DISABLED === 'true'/);
@@ -41,6 +41,7 @@ test('OpenAI chat route now requires independent output moderation',()=>{
  const after=api.slice(model);
  assert.match(after,/await openai\('moderations'/);
 });
-test('KNOWN BLOCKER: frontend does not apply Phase 4C-4 fallback module',()=>{
- assert.doesNotMatch(app,/phase4c4-fallback/);
+test('frontend integrates fail-closed browser adapter',()=>{
+ assert.match(app,/MiraclePawAIFallback/);
+ assert.match(html,/ai-fallback\.js/);
 });
