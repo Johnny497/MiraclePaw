@@ -9,6 +9,7 @@
   const gateForm = $('gateForm');
   const crisisNotice = $('crisisNotice');
   const aiFallback = $('aiFallback');
+  const fallbackAdapter = window.MiraclePawAIFallback;
   const status = $('connectionStatus');
   const maxTurns = 20;
   const history = []; // In-memory only: not stored in localStorage or on our server.
@@ -93,27 +94,26 @@
         body: JSON.stringify({ message, history: history.slice(-12) }),
         cache: 'no-store',
       });
-      // Netlify's native rate limiter may send a bare 429 with HTML or no JSON.
-      // Handle it before parsing, show the free static fallback, never auto-retry.
-      if (response.status === 429) {
-        throw new Error('AI 試玩請求太密集，請稍後再試；爪爪基本陪伴同免費固定劇本一直都可以使用。');
+      // No retry. A bare 429 or malformed response must never expose model text.
+      const result = response.ok ? await response.json().catch(() => null) : null;
+      const decision = fallbackAdapter?.classify(response.status, result);
+      if (!decision || !decision.showModelText) {
+        throw new Error(response.status === 429
+          ? 'AI 試玩請求太密集；唔需要連續重試。'
+          : 'AI 暫時未能提供已確認嘅回覆。');
       }
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.error || 'AI 暫時唔可用。你可以先用免費固定劇本，唔需要連續重試。');
-      }
-      const reply = String(result.reply || '').trim();
-      if (!reply) throw new Error('AI 回覆為空，請稍後重試。');
       pending.remove();
-      addMessage('assistant', reply);
-      addHistory(message, reply);
-      if (result.crisis) showCrisis();
+      addMessage('assistant', decision.text);
+      addHistory(message, decision.text);
+      if (decision.crisis) showCrisis();
       else $('petSpeech').textContent = '多謝你同我分享 🌼';
     } catch (error) {
       pending.remove();
       if (aiFallback) aiFallback.hidden = false;
-      addMessage('system', error instanceof Error ? error.message : '暫時連線失敗，請先使用免費固定劇本。');
-      if (/密碼/.test(String(error?.message))) $('connectionStatus').textContent = '密碼錯誤，請按 ↻ 重新輸入';
+      // Error messages are fixed locally; never display upstream bodies.
+      const decision = fallbackAdapter?.classify(0, null, true);
+      addMessage('assistant', decision?.text || '爪爪仍然喺度陪你。你可以繼續使用免費本地陪伴。');
+      status.textContent = 'AI 暫時唔可用 · 免費本地陪伴仍然可以使用';
     } finally {
       setBusy(false);
       input.focus();
