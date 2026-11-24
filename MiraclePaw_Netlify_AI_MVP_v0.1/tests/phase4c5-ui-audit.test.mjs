@@ -39,7 +39,7 @@ test('OpenAI chat route now requires independent output moderation',()=>{
  const model=api.indexOf("const response = await openai('responses'");
  assert.ok(model>0);
  const after=api.slice(model);
- assert.doesNotMatch(after,/await openai\('moderations'/);
+ assert.match(after,/await openai\('moderations'/);
 });
 test('KNOWN BLOCKER: frontend does not apply Phase 4C-4 fallback module',()=>{
  assert.doesNotMatch(app,/phase4c4-fallback/);
