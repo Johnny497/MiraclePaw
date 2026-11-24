@@ -1,8 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url);
-const {classify}=require('../public/ai-fallback.js');
+import {readFileSync} from 'node:fs';
+import {runInNewContext} from 'node:vm';
+const source=readFileSync(new URL('../public/ai-fallback.js',import.meta.url),'utf8');
+const browser={};
+runInNewContext(source,{globalThis:browser});
+const {classify}=browser.MiraclePawAIFallback;
+assert.equal(typeof classify,'function');
 test('429 rate limit returns local fallback without model content',()=>{
  const r=classify(429,{reply:'unsafe'});assert.equal(r.showModelText,false);assert.equal(r.reason,'rate_limit');
 });
