@@ -23,7 +23,8 @@ test('UI offers an API error fallback and does not auto-retry',()=>{
  assert.doesNotMatch(app,/setInterval\s*\(/);
 });
 test('model response is displayed only after server success (not independent proof of safety)',()=>{
- assert.match(app,/if \(!response\.ok\)/);
+ assert.match(app,/if \(!decision \|\| !decision\.showModelText\)/);
+ assert.match(app,/response\.ok\s*\?\s*await response\.json\(\)\.catch/);
  assert.match(app,/addMessage\('assistant', decision\.text\)/);
 });
 test('operator kill switches exist in BOTH server functions',()=>{
