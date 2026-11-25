@@ -17,6 +17,8 @@
   let sending = false;
   let count = 0;
   let selectedStep = '';
+  let activeRequest = null;
+  const requestTimeoutMs = 30000;
 
   const crisisPattern = /自殺|自殘|想死|唔想活|不想活|結束生命|割(?:手|腕)|跳樓|傷害自己|傷害別人|傷害他人|殺(?:人|咗佢|死佢)|殺死佢|kill myself|end my life|want to die|suicid(?:e|al)|self[ -]?harm|hurt myself|hurt someone|kill someone/i;
   const crisisText = '我聽到你而家可能好辛苦，我仍然喺度陪你。呢一刻先唔做任何任務。香港支援熱線：撒瑪利亞會 2389 2222、生命熱線 2382 0000。如果有人即時有危險，請打 999。你可以自己選擇點樣求助，星爪唔會偷偷聯絡第三方。';
@@ -38,11 +40,12 @@
     return row;
   }
 
-  function setBusy(value) {
+  function setBusy(value, finalStatus = '') {
     sending = value;
     input.disabled = value || !demoPasscode || count >= maxTurns;
     sendButton.disabled = input.disabled;
     if (value) status.textContent = '爪爪諗緊點樣回覆你…';
+    else if (finalStatus) status.textContent = finalStatus + (count >= maxTurns ? ' · 今次試玩到達上限' : '');
     else if (count >= maxTurns) status.textContent = '今次試玩到達上限，請按右上角重新開始';
     else if (!demoPasscode) status.textContent = '免費本地陪伴模式 · AI 對話未啟用';
     else status.textContent = '已準備傳送，首次訊息將驗證連線';
@@ -87,16 +90,22 @@
     messages.appendChild(pending);
     messages.scrollTop = messages.scrollHeight;
 
-    let requestFailed = false;
+    const controller = new AbortController();
+    activeRequest = controller;
+    const timeout = setTimeout(() => controller.abort(), requestTimeoutMs);
+    let finalStatus = '';
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Demo-Passcode': demoPasscode },
         body: JSON.stringify({ message, history: history.slice(-12) }),
         cache: 'no-store',
+        signal: controller.signal,
       });
       // No retry. A bare 429 or malformed response must never expose model text.
       const result = response.ok ? await response.json().catch(() => null) : null;
+      if (activeRequest !== controller) return;
+      if (controller.signal.aborted) throw new Error('Request timed out');
       const decision = fallbackAdapter?.classify(response.status, result);
       if (!decision || !decision.showModelText) {
         throw new Error(response.status === 429
@@ -106,20 +115,28 @@
       pending.remove();
       addMessage('assistant', decision.text);
       addHistory(message, decision.text);
-      if (decision.crisis) showCrisis();
-      else $('petSpeech').textContent = '多謝你同我分享 🌼';
+      if (decision.crisis) {
+        showCrisis();
+        finalStatus = '危機支援資訊已顯示';
+      } else {
+        $('petSpeech').textContent = '多謝你同我分享 🌼';
+        finalStatus = '已收到伺服器回覆';
+      }
     } catch (error) {
-      requestFailed = true;
+      if (activeRequest !== controller) return;
+      finalStatus = 'AI 暫時唔可用 · 免費本地陪伴仍然可以使用';
       pending.remove();
       if (aiFallback) aiFallback.hidden = false;
       // Error messages are fixed locally; never display upstream bodies.
       const decision = fallbackAdapter?.classify(0, null, true);
       addMessage('assistant', decision?.text || '爪爪仍然喺度陪你。你可以繼續使用免費本地陪伴。');
     } finally {
-      setBusy(false);
-      // setBusy(false) normally restores the ready label; preserve failure state instead.
-      if (requestFailed) status.textContent = 'AI 暫時唔可用 · 免費本地陪伴仍然可以使用';
-      input.focus();
+      clearTimeout(timeout);
+      if (activeRequest === controller) {
+        activeRequest = null;
+        setBusy(false, finalStatus);
+        input.focus();
+      }
     }
   }
 
@@ -209,6 +226,12 @@
     $('petSpeech').textContent = 'Hi 豆豆！☁️';
   });
   $('resetChat').addEventListener('click', () => {
+    const previousRequest = activeRequest;
+    activeRequest = null;
+    previousRequest?.abort();
+    sending = false;
+    input.value = '';
+    $('passcode').value = '';
     history.length = 0;
     count = 0;
     messages.replaceChildren();
