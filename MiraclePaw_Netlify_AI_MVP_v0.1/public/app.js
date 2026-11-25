@@ -87,6 +87,7 @@
     messages.appendChild(pending);
     messages.scrollTop = messages.scrollHeight;
 
+    let requestFailed = false;
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -108,14 +109,16 @@
       if (decision.crisis) showCrisis();
       else $('petSpeech').textContent = '多謝你同我分享 🌼';
     } catch (error) {
+      requestFailed = true;
       pending.remove();
       if (aiFallback) aiFallback.hidden = false;
       // Error messages are fixed locally; never display upstream bodies.
       const decision = fallbackAdapter?.classify(0, null, true);
       addMessage('assistant', decision?.text || '爪爪仍然喺度陪你。你可以繼續使用免費本地陪伴。');
-      status.textContent = 'AI 暫時唔可用 · 免費本地陪伴仍然可以使用';
     } finally {
       setBusy(false);
+      // setBusy(false) normally restores the ready label; preserve failure state instead.
+      if (requestFailed) status.textContent = 'AI 暫時唔可用 · 免費本地陪伴仍然可以使用';
       input.focus();
     }
   }
