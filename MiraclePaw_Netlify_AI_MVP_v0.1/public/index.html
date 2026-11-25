@@ -7,6 +7,8 @@
   <meta name="description" content="星爪 MiraclePaw — 一隻懂廣東話嘅 AI 虛擬寵物。內部成年持份者試玩版。" />
   <title>星爪 MiraclePaw｜一齊行一小步</title>
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/local-companion.css" />
+  <script src="/local-companion.js" defer></script>
   <script src="/ai-fallback.js" defer></script>
   <script src="/app.js" defer></script>
   <script src="/pet.js" defer></script>
@@ -112,6 +114,27 @@
           <ol id="moodHistory" class="mood-history" aria-label="本次試玩嘅心情記錄"></ol>
           <p id="moodEmpty" class="mood-empty">暫時未有記錄。記錄與否，都唔影響爪爪陪你。</p>
           <p class="mood-privacy">呢個只係成年人內部 Demo，唔係心理診斷或健康分數；唔會傳去 AI、Netlify Functions、資料庫或 GPS。最多只顯示本頁最近 10 次自願記錄。</p>
+        </section>
+        <section class="local-companion" id="localCompanion" hidden aria-labelledby="localCompanionTitle">
+          <span class="local-kicker">免費本地陪伴 · 固定選項 · 非 AI</span>
+          <h2 id="localCompanionTitle">同爪爪傾兩句</h2>
+          <p>只用預設虛構名字同心情示範上下文。唔使輸入個人資料，唔揀都得。</p>
+          <fieldset><legend>虛構試玩名字（自願）</legend><div class="local-choices">
+            <button type="button" data-fictional-name="ming" aria-pressed="false">阿明</button>
+            <button type="button" data-fictional-name="yan" aria-pressed="false">阿欣</button>
+          </div></fieldset>
+          <fieldset><legend>虛構心情（自願）</legend><div class="local-choices">
+            <button type="button" data-fictional-mood="tired" aria-pressed="false">有啲攰</button>
+            <button type="button" data-fictional-mood="worried" aria-pressed="false">有啲擔心</button>
+            <button type="button" data-fictional-mood="calm" aria-pressed="false">幾平靜</button>
+          </div></fieldset>
+          <p class="local-reply" id="localCompanionReply" role="status" aria-live="polite" aria-atomic="true">Hi～ 我係爪爪。</p>
+          <div class="local-choices">
+            <button type="button" id="localCompanionFollow">繼續傾下</button>
+            <button type="button" id="localCompanionStay">今日唔想出門</button>
+            <button type="button" id="localCompanionClear" disabled>清除本次示範</button>
+          </div>
+          <p>只喺本頁記住虛構選項，重新整理或清除即消失。唔係真實 AI、心理評估或緊急求助。<a href="/demo.html?scene=safety">睇固定危機支援示範</a>。</p>
         </section>
         <div class="little-steps" id="littleSteps" tabindex="-1">
           <div class="steps-heading"><span>☀</span><div><strong>今日嘅小小步</strong><small>全部自願，不設分數或懲罰</small></div></div>
