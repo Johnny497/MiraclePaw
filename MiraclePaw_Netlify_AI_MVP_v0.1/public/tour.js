@@ -32,6 +32,7 @@
   function focusTarget(id) {
     const target = $(id);
     if (!target) return;
+    if (typeof window !== 'undefined') window.MiraclePawShell?.showForTarget(id);
     if (typeof target.scrollIntoView === 'function') {
       target.scrollIntoView({ block: 'center', behavior: 'auto' });
     }
@@ -55,6 +56,7 @@
     start.hidden = false;
     next.hidden = true;
     stop.hidden = true;
+    if (typeof window !== 'undefined') window.MiraclePawShell?.showForTarget('tourStart');
     start.focus();
   }
 
