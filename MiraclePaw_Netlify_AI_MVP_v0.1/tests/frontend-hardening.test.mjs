@@ -39,10 +39,10 @@ class Element {
   }
   addEventListener(key,fn){this.handlers[key]=fn;}
   fire(key,arg){return this.handlers[key]?.(arg??{preventDefault(){}});}
-  appendChild(x){this.children.push(x);}
+  appendChild(x){x.parent=this;this.children.push(x);}
   append(...items){this.children.push(...items);}
   replaceChildren(...items){this.children=[...items];}
-  remove(){this.removed=true;}
+  remove(){this.removed=true;if(this.parent)this.parent.children=this.parent.children.filter(child=>child!==this);}
   setAttribute(k,v){this.attributes[k]=String(v);}
   removeAttribute(k){delete this.attributes[k];}
   focus(){this.focused=true;}
@@ -61,9 +61,14 @@ function simulate(fetchImpl=async()=>new Response(JSON.stringify({error:'AI 暫�
   };
   const requests=[];
   const fetch=async (...args)=>{requests.push(args);return await fetchImpl(...args);};
-  vm.runInNewContext(app,{document,fetch,Error,window:{MiraclePawAIFallback:browser.MiraclePawAIFallback}},{filename:'app.js'});
+  const timers=new Map();
+  let timerId=0;
+  const setTimeout=(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;};
+  const clearTimeout=id=>timers.delete(id);
+  vm.runInNewContext(app,{document,fetch,Error,AbortController,setTimeout,clearTimeout,window:{MiraclePawAIFallback:browser.MiraclePawAIFallback}},{filename:'app.js'});
   return {
-    e,requests,localCompanion,
+    e,requests,localCompanion,timers,
+    expire(){for(const {fn} of [...timers.values()])fn();},
     unlock(){e.agree.checked=true;e.passcode.value='mock-passcode-at-least-12-chars';e.gateForm.fire('submit');}
   };
 }
@@ -222,7 +227,7 @@ test('429, 503, network rejection, malformed JSON and timeout keep local status 
   }
 });
 
-test('valid server response is shown as text and returns to ready status without extra calls',async()=>{
+test('valid server response is shown as text and records success without extra calls',async()=>{
   const s=simulate(async()=>new Response(JSON.stringify({reply:'爪爪喺度陪你。',crisis:false}),{status:200}));
   s.unlock();
   s.e.userInput.value='【虛構測試】你好';
@@ -231,5 +236,66 @@ test('valid server response is shown as text and returns to ready status without
   assert.equal(s.requests.length,1);
   assert.equal(s.e.aiFallback.hidden,true);
   assert.match(s.e.messages.children.at(-1).children[0].textContent,/爪爪喺度陪你/);
-  assert.match(s.e.connectionStatus.textContent,/已準備傳送/);
+  assert.match(s.e.connectionStatus.textContent,/已收到伺服器回覆/);
+});
+
+test('browser deadline aborts a pending fetch and preserves local fallback without retry',async()=>{
+  const s=simulate(async(_url,{signal})=>new Promise((_resolve,reject)=>{
+    signal.addEventListener('abort',()=>reject(new DOMException('mock timeout','AbortError')),{once:true});
+  }));
+  s.unlock();
+  s.e.userInput.value='【虛構測試】今日想聽音樂';
+  s.e.chatForm.fire('submit');
+  assert.equal(s.requests.length,1);
+  assert.equal(s.e.sendButton.disabled,true);
+  assert.equal([...s.timers.values()][0].ms,30000);
+  s.expire();
+  await settle();
+  assert.equal(s.requests[0][1].signal.aborted,true);
+  assert.equal(s.requests.length,1);
+  assert.equal(s.timers.size,0);
+  assert.equal(s.e.sendButton.disabled,false);
+  assert.equal(s.e.aiFallback.hidden,false);
+  assert.match(s.e.connectionStatus.textContent,/AI 暫時唔可用/);
+  assert.match(s.e.messages.children.at(-1).children[0].textContent,/免費本地寵物/);
+});
+
+test('reset during pending fetch discards stale response and keeps new session independent',async()=>{
+  let resolveOld;
+  const s=simulate(async()=>new Promise(resolve=>{resolveOld=resolve;}));
+  s.unlock();
+  s.e.userInput.value='【虛構測試】舊對話';
+  s.e.chatForm.fire('submit');
+  s.e.resetChat.fire('click');
+  assert.equal(s.requests[0][1].signal.aborted,true);
+  assert.equal(s.e.gate.hidden,false);
+  assert.equal(s.e.userInput.value,'');
+  assert.equal(s.e.passcode.value,'');
+  resolveOld(new Response(JSON.stringify({reply:'STALE_RESPONSE',crisis:false}),{status:200}));
+  await settle();
+  assert.equal(s.e.messages.children.length,1);
+  assert.doesNotMatch(s.e.messages.children[0].children[0].textContent,/STALE_RESPONSE/);
+  assert.match(s.e.connectionStatus.textContent,/請先完成試玩確認/);
+  assert.equal(s.e.sendButton.disabled,true);
+  assert.equal(s.timers.size,0);
+  assert.equal(s.requests.length,1);
+});
+
+test('manual recovery after failure clears banner and shows successful server status',async()=>{
+  let attempts=0;
+  const s=simulate(async()=>++attempts===1?new Response('mock unavailable',{status:503}):
+    new Response(JSON.stringify({reply:'爪爪喺度陪你。',crisis:false}),{status:200}));
+  s.unlock();
+  s.e.userInput.value='【虛構測試】第一次';
+  s.e.chatForm.fire('submit');
+  await settle();
+  assert.equal(s.requests.length,1);
+  assert.match(s.e.connectionStatus.textContent,/AI 暫時唔可用/);
+  s.e.userInput.value='【虛構測試】第二次';
+  s.e.chatForm.fire('submit');
+  await settle();
+  assert.equal(s.requests.length,2);
+  assert.equal(s.e.aiFallback.hidden,true);
+  assert.match(s.e.connectionStatus.textContent,/已收到伺服器回覆/);
+  assert.equal(s.timers.size,0);
 });
