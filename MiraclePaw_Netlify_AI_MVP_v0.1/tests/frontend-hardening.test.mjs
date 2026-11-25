@@ -3,10 +3,13 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
-const [app,html]=await Promise.all([
+const [app,html,fallbackSource]=await Promise.all([
   readFile(new URL('../public/app.js',import.meta.url),'utf8'),
-  readFile(new URL('../public/index.html',import.meta.url),'utf8')
+  readFile(new URL('../public/index.html',import.meta.url),'utf8'),
+  readFile(new URL('../public/ai-fallback.js',import.meta.url),'utf8')
 ]);
+const browser={};
+vm.runInNewContext(fallbackSource,{globalThis:browser});
 const ids=[
   'messages','chatForm','userInput','sendButton','gate','gateForm',
   'crisisNotice','aiFallback','connectionStatus','petSpeech',
@@ -58,7 +61,7 @@ function simulate(fetchImpl=async()=>new Response(JSON.stringify({error:'AI 暫�
   };
   const requests=[];
   const fetch=async (...args)=>{requests.push(args);return await fetchImpl(...args);};
-  vm.runInNewContext(app,{document,fetch,Error},{filename:'app.js'});
+  vm.runInNewContext(app,{document,fetch,Error,window:{MiraclePawAIFallback:browser.MiraclePawAIFallback}},{filename:'app.js'});
   return {
     e,requests,localCompanion,
     unlock(){e.agree.checked=true;e.passcode.value='mock-passcode-at-least-12-chars';e.gateForm.fire('submit');}
@@ -90,9 +93,10 @@ test('upstream AI failure exposes optional scripted-demo fallback without repeat
   assert.equal(s.requests[0][0],'/api/chat');
   assert.equal(e.aiFallback.hidden,false);
   assert.equal(e.sendButton.disabled,false);
-  const replies=e.messages.children.filter(row=>row.className==='message system');
+  const replies=e.messages.children.filter(row=>row.className==='message assistant');
   assert.equal(replies.length,1);
-  assert.match(replies[0].children[0].textContent,/AI 暫時未能回覆/);
+  assert.match(replies[0].children[0].textContent,/免費本地寵物/);
+  assert.match(e.connectionStatus.textContent,/AI 暫時唔可用/);
   assert.match(html,/id="aiFallback"/);
   assert.match(html,/<a href="\/demo\.html">五個免費虛構固定劇本<\/a>/);
   assert.match(html,/role="status" aria-live="polite"/);
@@ -139,9 +143,10 @@ test('Netlify native 429 with non-JSON HTML is handled without retrying or leaki
   await settle();
   assert.equal(s.requests.length,1);
   assert.equal(e.aiFallback.hidden,false);
-  const rows=e.messages.children.filter(row=>row.className==='message system');
+  const rows=e.messages.children.filter(row=>row.className==='message assistant');
   assert.equal(rows.length,1);
-  assert.match(rows[0].children[0].textContent,/請求太密集/);
+  assert.match(rows[0].children[0].textContent,/免費本地寵物/);
+  assert.match(e.connectionStatus.textContent,/AI 暫時唔可用/);
   assert.doesNotMatch(rows[0].children[0].textContent,/<html>|edge limit/);
   assert.equal(e.sendButton.disabled,false);
 });
@@ -157,8 +162,9 @@ test('operator disabled response still shows static backup and does not auto-ret
   await settle();
   assert.equal(s.requests.length,1);
   assert.equal(s.e.aiFallback.hidden,false);
-  const rows=s.e.messages.children.filter(row=>row.className==='message system');
-  assert.match(rows[0].children[0].textContent,/管理員關閉/);
+  const rows=s.e.messages.children.filter(row=>row.className==='message assistant');
+  assert.match(rows[0].children[0].textContent,/免費本地寵物/);
+  assert.match(s.e.connectionStatus.textContent,/AI 暫時唔可用/);
 });
 
 test('free local companion requires adult acknowledgment but no passcode, no AI traffic',()=>{
@@ -188,4 +194,42 @@ test('no-outing suggestion is a local reassurance even when AI is available',()=
   assert.equal(s.requests.length,0);
   assert.match(e.stepStatus.textContent,/唔出去完全可以/);
   assert.match(e.messages.children.at(-1).children[0].textContent,/一樣陪住/);
+});
+
+test('429, 503, network rejection, malformed JSON and timeout keep local status and never leak upstream text',async()=>{
+  const failures=[
+    ['429',async()=>new Response('secret-429',{status:429})],
+    ['503',async()=>new Response('secret-503',{status:503})],
+    ['network',async()=>{throw new Error('secret-network');}],
+    ['malformed JSON',async()=>new Response('{secret-invalid-json',{status:200})],
+    ['timeout',async()=>{const err=new Error('secret-timeout');err.name='AbortError';throw err;}],
+    ['HTTP 504',async()=>new Response('secret-504',{status:504})],
+  ];
+  for(const [name,implementation] of failures){
+    const s=simulate(implementation);
+    s.unlock();
+    s.e.userInput.value='【虛構測試】爪爪，今日想聽下音樂。';
+    s.e.chatForm.fire('submit');
+    await settle();
+    assert.equal(s.requests.length,1,name+' should issue one request');
+    assert.equal(s.e.aiFallback.hidden,false,name+' must show banner');
+    assert.match(s.e.connectionStatus.textContent,/AI 暫時唔可用/,name+' must preserve error status');
+    assert.doesNotMatch(s.e.connectionStatus.textContent,/已準備傳送/,name);
+    const replies=s.e.messages.children.filter(row=>row.className==='message assistant'&&!row.removed);
+    assert.equal(replies.length,1,name);
+    assert.match(replies[0].children[0].textContent,/免費本地寵物/,name);
+    assert.doesNotMatch(replies[0].children[0].textContent,/secret-/,name);
+  }
+});
+
+test('valid server response is shown as text and returns to ready status without extra calls',async()=>{
+  const s=simulate(async()=>new Response(JSON.stringify({reply:'爪爪喺度陪你。',crisis:false}),{status:200}));
+  s.unlock();
+  s.e.userInput.value='【虛構測試】你好';
+  s.e.chatForm.fire('submit');
+  await settle();
+  assert.equal(s.requests.length,1);
+  assert.equal(s.e.aiFallback.hidden,true);
+  assert.match(s.e.messages.children.at(-1).children[0].textContent,/爪爪喺度陪你/);
+  assert.match(s.e.connectionStatus.textContent,/已準備傳送/);
 });
