@@ -1,5 +1,6 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
+import { withMockQuota } from './fixtures/quota.mjs';
 import handler from '../netlify/functions/chat.mjs';
 import { verdict, moderation } from './fixtures/moderation.mjs';
 
@@ -38,25 +39,25 @@ function req(message, history = [], code = testCode) {
 }
 
 test('rejects invalid or missing demo passcode', async () => {
-  const response = await handler(req('你好', [], 'wrong'));
+  const response = await withMockQuota(handler, req('你好', [], 'wrong'));
   assert.equal(response.status, 401);
 });
 
 test('fails closed when not configured', async () => {
   delete process.env.OPENAI_API_KEY;
-  const response = await handler(req('你好'));
+  const response = await withMockQuota(handler, req('你好'));
   assert.equal(response.status, 503);
   process.env.OPENAI_API_KEY = 'sk-test-not-real';
 });
 
 test('rejects oversized messages', async () => {
-  const response = await handler(req('測'.repeat(501)));
+  const response = await withMockQuota(handler, req('測'.repeat(501)));
   assert.equal(response.status, 400);
 });
 
 test('Cantonese crisis phrase results in helplines without calling AI', async () => {
   globalThis.fetch = () => { throw new Error('Must not invoke external AI'); };
-  const response = await handler(req('我想自殺'));
+  const response = await withMockQuota(handler, req('我想自殺'));
   const body = await response.json();
   assert.equal(response.status, 200);
   assert.equal(body.crisis, true);
@@ -74,7 +75,7 @@ test('normal input uses independent input/output moderation and stateless Respon
     }
     return new Response(JSON.stringify({ output: [{ content: [{ type: 'output_text', text: '你好呀！我記得你叫阿明。🍀' }] }] }), { status: 200 });
   };
-  const response = await handler(req('你仲記唔記得我叫咩名？', [{ role: 'user', content: '我叫阿明' }, { role: 'assistant', content: '好呀阿明' }]));
+  const response = await withMockQuota(handler, req('你仲記唔記得我叫咩名？', [{ role: 'user', content: '我叫阿明' }, { role: 'assistant', content: '好呀阿明' }]));
   const body = await response.json();
   assert.equal(response.status, 200);
   assert.match(body.reply, /阿明/);
@@ -96,14 +97,14 @@ test('moderation flags safety issues before response model call', async () => {
     calls += 1;
     return new Response(JSON.stringify({ results: [verdict({ 'self-harm/intent': true })] }), { status: 200 });
   };
-  const response = await handler(req('我有啲危險嘅念頭'));
+  const response = await withMockQuota(handler, req('我有啲危險嘅念頭'));
   assert.equal((await response.json()).crisis, true);
   assert.equal(calls, 1);
 });
 
 test('moderation outage fails closed', async () => {
   globalThis.fetch = async () => new Response('down', { status: 503 });
-  const response = await handler(req('今日天氣幾好'));
+  const response = await withMockQuota(handler, req('今日天氣幾好'));
   assert.equal(response.status, 502);
   assert.match((await response.json()).error, /安全檢查/);
 });

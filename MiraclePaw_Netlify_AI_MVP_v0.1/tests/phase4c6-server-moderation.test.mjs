@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { withMockQuota } from './fixtures/quota.mjs';
 import handler from '../netlify/functions/chat.mjs';
 import { verdict, moderation } from './fixtures/moderation.mjs';
 
@@ -10,7 +11,7 @@ async function scenario(responses){
  process.env.AI_CHAT_ENABLED='true';process.env.AI_CHAT_DISABLED='false';process.env.OPENAI_API_KEY='test-only-key';process.env.DEMO_PASSCODE='fictional-demo-passcode-123';
  const calls=[];
  globalThis.fetch=async(url)=>{calls.push(String(url));const next=responses.shift();if(next instanceof Error)throw next;if(!next)throw Error('unexpected call');return new Response(JSON.stringify(next),{status:200,headers:{'content-type':'application/json'}});};
- try{const r=await handler(request());return {status:r.status,data:await r.json(),calls};}
+ try{const r=await withMockQuota(handler, request());return {status:r.status,data:await r.json(),calls};}
  finally{globalThis.fetch=oldFetch;for(const k of ['AI_CHAT_ENABLED','AI_CHAT_DISABLED','OPENAI_API_KEY','DEMO_PASSCODE']){if(saved[k]===undefined)delete process.env[k];else process.env[k]=saved[k];}}
 }
 const ok=moderation();
@@ -38,6 +39,6 @@ test('input moderation flagged: no model call',async()=>{
 });
 test('operator kill switch blocks all upstream calls',async()=>{
  process.env.AI_CHAT_ENABLED='true';process.env.AI_CHAT_DISABLED='true';let count=0;globalThis.fetch=async()=>{count++;throw Error('should not call');};
- try{const r=await handler(request());assert.equal(r.status,503);assert.equal(count,0);}
+ try{const r=await withMockQuota(handler, request());assert.equal(r.status,503);assert.equal(count,0);}
  finally{globalThis.fetch=oldFetch;for(const k of ['AI_CHAT_ENABLED','AI_CHAT_DISABLED']){if(saved[k]===undefined)delete process.env[k];else process.env[k]=saved[k];}}
 });

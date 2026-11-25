@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { withMockQuota } from './fixtures/quota.mjs';
 import chat from '../netlify/functions/chat.mjs';
 import sandbox from '../netlify/functions/deepseek-test.mjs';
 import { moderationDecision } from '../netlify/lib/moderation.mjs';
@@ -31,7 +32,7 @@ async function run(route, { env = {}, responses = [], payload = { message: 'ไปๆ
       if (next === undefined) throw new Error('Unexpected mocked request');
       return new Response(JSON.stringify(next), { status: 200 });
     };
-    const response = await handlers[route](new Request('https://example.test/api/mock', {
+    const response = await withMockQuota(handlers[route], new Request('https://example.test/api/mock', {
       method: 'POST', headers: { 'x-demo-passcode': auth, 'content-type': 'application/json' }, body: JSON.stringify(payload),
     }));
     return { status: response.status, data: await response.json(), calls, headers: response.headers };

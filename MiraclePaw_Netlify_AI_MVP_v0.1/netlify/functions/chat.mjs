@@ -1,5 +1,6 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { moderationDecision } from '../lib/moderation.mjs';
+import { reserveQuota, assertQuotaActive, QuotaDenied } from '../lib/quota.mjs';
 
 // MiraclePaw internal adult-stakeholder demo only. Not a production youth mental-health service.
 const HOTLINES = '撒瑪利亞會 2389 2222｜生命熱線 2382 0000';
@@ -49,17 +50,21 @@ function looksLikeCrisis(message) {
   return KEYWORDS.some((r) => r.test(message));
 }
 
-async function openai(path, body, key) {
+async function openai(path, body, key, lease) {
+  assertQuotaActive(lease, 20000);
+  const serialized = JSON.stringify(body);
+  if (Buffer.byteLength(serialized, 'utf8') > (path === 'moderations' ? 64000 : 36000)) throw new QuotaDenied();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20000);
   try {
     const response = await fetch(`https://api.openai.com/v1/${path}`, {
       method: 'POST',
+      redirect: 'error',
       headers: {
         'Authorization': `Bearer ${key}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: serialized,
       signal: controller.signal,
     });
     if (!response.ok) {
@@ -144,26 +149,27 @@ export default async function handler(request) {
   }
 
   try {
+    const lease = await reserveQuota('chat', request.url);
     // Review every forwarded turn and their combined context in one moderation request.
     // No truncation beyond the existing validated history/body limits.
     const moderationInput = recent.length ? [...turns.map(({ content }) => content), transcript] : inputText;
     const moderation = await openai('moderations', {
       model: 'omni-moderation-latest',
       input: moderationInput,
-    }, key);
+    }, key, lease);
     const decision = moderationDecision(moderation, Array.isArray(moderationInput) ? moderationInput.length : 1);
     if (decision === 'crisis') return json({ reply: crisisReply, crisis: true });
     if (decision === 'filtered') return json({ reply: safeFallback, crisis: false, filtered: true });
 
     const response = await openai('responses', {
-      model: process.env.OPENAI_MODEL || 'gpt-5.4-mini',
+      model: 'gpt-5.4-mini',
       instructions: INSTRUCTIONS,
       input: turns,
       max_output_tokens: 420,
       store: false,
-    }, key);
+    }, key, lease);
     const reply = extractText(response);
-    if (!reply) throw new Error('Empty model response');
+    if (!reply || reply.length > 1600) throw new Error('Invalid model response');
     // Conservative output keyword check; NOT a comprehensive or clinical safety test.
     if (looksLikeCrisis(reply)) return json({ reply: crisisReply, crisis: true });
     // Phase 4C-6: independent output moderation. Fail closed on missing or malformed verdict.
@@ -171,14 +177,14 @@ export default async function handler(request) {
     const outputModeration = await openai('moderations', {
       model: 'omni-moderation-latest',
       input: reply,
-    }, key);
+    }, key, lease);
     const outputDecision = moderationDecision(outputModeration);
     if (outputDecision === 'crisis') return json({ reply: crisisReply, crisis: true });
     if (outputDecision === 'filtered') return json({ reply: safeFallback, crisis: false, filtered: true });
     return json({ reply: reply.slice(0, 1600), crisis: false });
   } catch (error) {
     // No raw user text, conversation history, API keys or upstream bodies in logs.
-    const kind = error instanceof UpstreamFailure ? error.kind : 'UNAVAILABLE';
+    const kind = error instanceof QuotaDenied ? 'LIMIT' : error instanceof UpstreamFailure ? error.kind : 'UNAVAILABLE';
     console.error('MiraclePaw AI upstream failure class:', kind);
     if (kind === 'LIMIT') {
       return json({ code: 'AI_LIMIT', error: 'AI 服務暫時達到使用限制。唔使重複傳送；你仍然可以開啟免費固定劇本，爪爪嘅基本陪伴唔會消失。' }, 503);

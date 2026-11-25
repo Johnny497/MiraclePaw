@@ -1,6 +1,7 @@
 // DeepSeek integration sandbox only. Not linked from UI, not approved for public AI use.
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { moderationDecision } from '../lib/moderation.mjs';
+import { reserveQuota, assertQuotaActive, QuotaDenied } from '../lib/quota.mjs';
 
 const reply = (data, status = 200) => new Response(JSON.stringify(data), {
   status, headers: { 'content-type': 'application/json; charset=utf-8',
@@ -14,18 +15,21 @@ const crisis = /自殺|自殘|想死|唔想活|不想活|傷害自己|傷害別�
 const hotline = '撒瑪利亞會 2389 2222｜生命熱線 2382 0000';
 const support = `爪爪仍然喺度陪你。你可以自行聯絡 ${hotline}；有即時危險請打香港 999。星爪唔會暗中通知其他人。`;
 const safeFallback = '爪爪暫時未能安全回覆呢句，但我仍然喺度陪你。你可以轉用免費本地陪伴。';
-async function moderate(text, key) {
+async function moderate(text, key, lease) {
   const response = await postJson('https://api.openai.com/v1/moderations',
-    { model: 'omni-moderation-latest', input: text }, key);
+    { model: 'omni-moderation-latest', input: text }, key, lease);
   return moderationDecision(response);
 }
-async function postJson(url, payload, key, timeoutMs = 12000) {
+async function postJson(url, payload, key, lease, timeoutMs = 12000) {
+  assertQuotaActive(lease, timeoutMs);
+  const serialized = JSON.stringify(payload);
+  if (Buffer.byteLength(serialized, 'utf8') > 8192) throw new QuotaDenied();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const r = await fetch(url, { method: 'POST', signal: controller.signal,
+    const r = await fetch(url, { method: 'POST', redirect: 'error', signal: controller.signal,
       headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-      body: JSON.stringify(payload) });
+      body: serialized });
     if (!r.ok) throw new Error('upstream_failure');
     return await r.json();
   } finally { clearTimeout(timer); }
@@ -55,8 +59,9 @@ export default async function handler(request) {
     return reply({ error: 'Invalid message' }, 400);
   if (crisis.test(message)) return reply({ reply: support, crisis: true });
   try {
+    const lease = await reserveQuota('sandbox', request.url);
     // Independent input moderation is mandatory. Fail closed if unavailable.
-    const inputDecision = await moderate(message, moderationKey);
+    const inputDecision = await moderate(message, moderationKey, lease);
     if (inputDecision === 'crisis') return reply({ reply: support, crisis: true });
     if (inputDecision === 'filtered') return reply({ reply: safeFallback, crisis: false, filtered: true });
     const answer = await postJson('https://api.deepseek.com/chat/completions', {
@@ -65,17 +70,18 @@ export default async function handler(request) {
         { role: 'system', content: 'You are 爪爪, a fictional virtual pet for adult internal tests using fictional data only. Respond in gentle Hong Kong Cantonese, traditional Chinese. Do not diagnose, pressure users to go outside, or claim to be a human. Never facilitate self-harm or violence. Never claim real-world matching or GPS. Keep responses short.' },
         { role: 'user', content: message }
       ]
-    }, deepseekKey);
+    }, deepseekKey, lease);
     const output = answer?.choices?.[0]?.message?.content;
     if (typeof output !== 'string' || !output.trim() || output.length > 1600) throw new Error('invalid_output');
     // Never display model text before independent output moderation succeeds.
     // The output check is an additional guardrail, not a clinical safety guarantee.
     if (crisis.test(output)) return reply({ reply: support, crisis: true });
-    const outputDecision = await moderate(output, moderationKey);
+    const outputDecision = await moderate(output, moderationKey, lease);
     if (outputDecision === 'crisis') return reply({ reply: support, crisis: true });
     if (outputDecision === 'filtered') return reply({ reply: safeFallback, crisis: false, filtered: true });
     return reply({ reply: output, crisis: false, sandbox: true });
-  } catch {
+  } catch (error) {
+    if (error instanceof QuotaDenied) return reply({ code: 'SANDBOX_LIMIT', error: `Sandbox unavailable; local companion remains free. 香港支援：${hotline}；有即時危險請打香港 999。` }, 503);
     // No secrets, user content or upstream response bodies in logs or response.
     return reply({ code: 'SANDBOX_UNAVAILABLE', error: `Sandbox unavailable; local companion remains free. 香港支援：${hotline}；有即時危險請打香港 999。` }, 503);
   }

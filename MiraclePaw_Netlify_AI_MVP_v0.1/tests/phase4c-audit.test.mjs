@@ -20,8 +20,8 @@ test('local script does not write conversation history to files',()=>{
 test('Netlify sandbox defaults disabled and requires independent input AND output moderation',()=>{
  assert.match(netlify,/DEEPSEEK_TEST_ENABLED !== 'true'/);
  assert.match(netlify,/!moderationKey/);
- assert.match(netlify,/await moderate\(message, moderationKey\)/);
- assert.match(netlify,/await moderate\(output, moderationKey\)/);
+ assert.match(netlify,/await moderate\(message, moderationKey, lease\)/);
+ assert.match(netlify,/await moderate\(output, moderationKey, lease\)/);
 });
 test('Netlify sandbox has no hard-coded API key',()=>{
  assert.doesNotMatch(netlify,/sk-[a-zA-Z0-9]{20,}/);
