@@ -58,12 +58,12 @@ test('Cantonese crisis phrase results in helplines without calling AI', async ()
   assert.match(body.reply, /2382 0000/);
 });
 
-test('normal input uses moderation and stateless Responses API', async () => {
+test('normal input uses independent input/output moderation and stateless Responses API', async () => {
   const calls = [];
   globalThis.fetch = async (url, init) => {
     calls.push({ url, body: JSON.parse(init.body) });
     if (String(url).endsWith('/moderations')) {
-      return new Response(JSON.stringify({ results: [{ categories: { 'self-harm': false, 'self-harm/intent': false, 'self-harm/instructions': false, violence: false, 'violence/graphic': false } }] }), { status: 200 });
+      return new Response(JSON.stringify({ results: [{ flagged: false, categories: { 'self-harm': false, 'self-harm/intent': false, 'self-harm/instructions': false, violence: false, 'violence/graphic': false } }] }), { status: 200 });
     }
     return new Response(JSON.stringify({ output: [{ content: [{ type: 'output_text', text: '你好呀！我記得你叫阿明。🍀' }] }] }), { status: 200 });
   };
@@ -72,7 +72,10 @@ test('normal input uses moderation and stateless Responses API', async () => {
   assert.equal(response.status, 200);
   assert.match(body.reply, /阿明/);
   assert.equal(body.crisis, false);
-  assert.equal(calls.length, 2);
+  assert.equal(calls.length, 3);
+  assert.match(String(calls[0].url),/moderations$/);
+  assert.match(String(calls[1].url),/responses$/);
+  assert.match(String(calls[2].url),/moderations$/);
   assert.equal(calls[1].body.store, false);
   assert.equal(calls[1].body.model, 'gpt-5.4-mini');
   assert.equal(calls[1].body.input.length, 3);
