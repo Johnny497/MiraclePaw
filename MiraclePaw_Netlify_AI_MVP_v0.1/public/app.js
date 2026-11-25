@@ -202,10 +202,8 @@
     button.addEventListener('click', reassureNoOuting)
   );
   $('petHello').addEventListener('click', () => {
-    const msg = $('petHelloMessage');
-    msg.textContent = '🐱 豆豆（虛構寵物）：Hi 爪爪！今日見到一朵好靚嘅雲 ☁️。呢段係純模擬嘅寵物互動，唔涉及真人配對、定位或資料分享。你可以完全唔跟進。';
-    msg.hidden = false;
-    $('petSpeech').textContent = 'Hi 豆豆！☁️';
+    // Optional fictional encounter; the module enforces admission and crisis pause.
+    window.MiraclePawPetSocial?.open();
   });
   $('resetChat').addEventListener('click', () => {
     const previousRequest = activeRequest;

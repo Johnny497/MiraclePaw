@@ -13,7 +13,9 @@
   <script src="/app.js" defer></script>
   <link rel="stylesheet" href="/journey.css" />
   <script src="/journey.js" defer></script>
+  <link rel="stylesheet" href="/pet-experience.css" />
   <script src="/pet.js" defer></script>
+  <script src="/pet-social.js" defer></script>
   <script src="/mood.js" defer></script>
   <script src="/tour.js" defer></script>
 </head>
@@ -157,11 +159,18 @@
           </div>
           <p class="journey-note">冇實際定位、打卡紀錄、上傳或完成要求。戶外情境只供示範；現實中以自己安全、身體狀況及意願為先，唔舒服就停低或返回。</p>
         </section>
-        <div class="pet-social" id="petSocial">
-          <div><strong>🐾 由寵物先打招呼</strong><small>未來社交概念 · 目前純模擬，冇連接任何真人</small></div>
-          <button type="button" id="petHello" class="pet-hello-btn">試下模擬打招呼 →</button>
-          <p id="petHelloMessage" class="pet-hello-message" aria-live="polite" hidden></p>
-        </div>
+        <section class="pet-social" id="petSocial" hidden aria-labelledby="petSocialTitle">
+          <div><strong id="petSocialTitle">🐾 寵物小小見面</strong><small>豆豆係虛構寵物，冇真人、定位或資料分享。唔需要先出門。</small></div>
+          <button type="button" id="petHello" class="pet-hello-btn">睇下豆豆打招呼</button>
+          <p id="petHelloMessage" class="pet-hello-message" role="status" aria-live="polite" aria-atomic="true" hidden></p>
+          <div id="petSocialChoices" class="pet-social-choices" hidden>
+            <button type="button" data-social-reply="wave">👋 揮揮手</button>
+            <button type="button" data-social-reply="quiet">☁ 靜靜陪一陣</button>
+            <button type="button" id="petSocialInfo" hidden>了解未來自願交流</button>
+            <button type="button" id="petSocialLeave">唔跟進／返回陪伴</button>
+          </div>
+          <p id="petSocialBoundary" class="pet-social-boundary" hidden>未來真人交流必須另行自願同意；呢個 Demo 冇真人配對、邀請、聯絡或定位功能。</p>
+        </section>
         <p class="footnote">✦ 呢度冇 GPS 定位，微行動只係虛構情境，唔會保存出門紀錄。</p>
       </section>
 
