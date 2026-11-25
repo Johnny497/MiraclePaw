@@ -1,0 +1,14 @@
+/* Gentle Journey: no visual levels, completion bars, streaks or locked stages. */
+.gentle-journey[hidden] { display: none !important; }
+.gentle-journey .journey-intro, .gentle-journey .journey-note { font-size: 13px; line-height: 1.65; margin: 10px 0; }
+.gentle-journey .journey-scenes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.gentle-journey button { min-height: 44px; border: 1px solid #a0b9a5; border-radius: 12px; padding: 10px; color: #345b44; background: #fffefa; font: inherit; font-size: 13px; overflow-wrap: anywhere; }
+.gentle-journey .journey-scenes button { display: flex; gap: 8px; align-items: flex-start; text-align: left; min-width: 0; }
+.gentle-journey .journey-scenes strong, .gentle-journey .journey-scenes small { display: block; line-height: 1.5; }
+.gentle-journey .journey-scenes small { font-size: 12px; color: #47644f; }
+.gentle-journey button[aria-pressed="true"] { border-color: #437d59; background: #e1eee2; }
+.gentle-journey button:focus-visible { outline: 3px solid #357b5b; outline-offset: 2px; }
+.gentle-journey button:disabled { opacity: .55; }
+.gentle-journey .journey-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.gentle-journey .step-status { margin: 12px 0; color: #365e45; }
+@media (max-width: 420px) { .gentle-journey .journey-scenes { grid-template-columns: minmax(0,1fr); } }

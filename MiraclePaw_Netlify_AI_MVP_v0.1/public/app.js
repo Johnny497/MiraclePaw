@@ -16,7 +16,6 @@
   let demoPasscode = '';
   let sending = false;
   let count = 0;
-  let selectedStep = '';
   let activeRequest = null;
   const requestTimeoutMs = 30000;
 
@@ -191,23 +190,6 @@
     button.addEventListener('click', () => send(button.dataset.prompt));
   });
 
-  document.querySelectorAll('[data-step]').forEach((button) => {
-    button.addEventListener('click', () => {
-      selectedStep = button.dataset.step;
-      document.querySelectorAll('[data-step]').forEach((b) => b.classList.toggle('selected', b === button));
-      $('stepStatus').textContent = `你揀咗「${selectedStep}」，做唔做都冇關係。`;
-      $('doneStep').disabled = false;
-    });
-  });
-  $('doneStep').addEventListener('click', () => {
-    if (!selectedStep) return;
-    addMessage('system', `模擬打卡：今日試咗「${selectedStep}」。呢個只係本頁展示，冇 GPS、冇上傳打卡資料。`);
-    $('stepStatus').textContent = '已完成模擬打卡！無論做唔做到，都值得被好好對待。';
-    $('petSpeech').textContent = '謝謝你願意試試 🌿';
-    document.querySelectorAll('[data-step]').forEach((b) => b.classList.remove('selected'));
-    selectedStep = '';
-    $('doneStep').disabled = true;
-  });
   function reassureNoOuting() {
     $('stepStatus').textContent = '今日唔出去完全可以。爪爪一樣陪住你。';
     $('petSpeech').textContent = '今日休息都得 🫶';

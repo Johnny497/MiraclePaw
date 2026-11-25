@@ -11,6 +11,8 @@
   <script src="/local-companion.js" defer></script>
   <script src="/ai-fallback.js" defer></script>
   <script src="/app.js" defer></script>
+  <link rel="stylesheet" href="/journey.css" />
+  <script src="/journey.js" defer></script>
   <script src="/pet.js" defer></script>
   <script src="/mood.js" defer></script>
   <script src="/tour.js" defer></script>
@@ -136,25 +138,31 @@
           </div>
           <p>只喺本頁記住虛構選項，重新整理或清除即消失。唔係真實 AI、心理評估或緊急求助。<a href="/demo.html?scene=safety">睇固定危機支援示範</a>。</p>
         </section>
-        <div class="little-steps" id="littleSteps" tabindex="-1">
-          <div class="steps-heading"><span>☀</span><div><strong>今日嘅小小步</strong><small>全部自願，不設分數或懲罰</small></div></div>
-          <div class="step-buttons">
-            <button type="button" class="step" data-step="開窗透下氣">🍃 開窗透下氣</button>
-            <button type="button" class="step" data-step="飲杯水">💧 飲杯水</button>
-            <button type="button" class="step" data-step="日間安全地方散步">🌤 日間散步</button>
+        <section class="little-steps gentle-journey" id="littleSteps" tabindex="-1" hidden aria-labelledby="journeyTitle">
+          <div class="steps-heading"><span aria-hidden="true">☀</span><div><strong id="journeyTitle">同爪爪慢慢行</strong><small>自願生活情境 · 冇等級、冇分數</small></div></div>
+          <p class="journey-intro">以下全部係虛構試玩情境，唔係出門指令。可以直接揀任何一個、返回室內，或者唔揀。</p>
+          <div class="journey-scenes" role="group" aria-label="自由選擇生活情境">
+            <button type="button" data-journey="view" aria-pressed="false"><span aria-hidden="true">🌤</span><span><strong>望一望窗外</strong><small>留喺原位都可以</small></span></button>
+            <button type="button" data-journey="window" aria-pressed="false"><span aria-hidden="true">🪟</span><span><strong>窗邊休息</strong><small>唔需要開窗或出門</small></span></button>
+            <button type="button" data-journey="door" aria-pressed="false"><span aria-hidden="true">🚪</span><span><strong>門口附近</strong><small>可以留喺屋內</small></span></button>
+            <button type="button" data-journey="downstairs" aria-pressed="false"><span aria-hidden="true">🌿</span><span><strong>樓下熟悉地方</strong><small>日間、安全、可隨時返回</small></span></button>
+            <button type="button" data-journey="public" aria-pressed="false"><span aria-hidden="true">🌳</span><span><strong>安全日間公共場所</strong><small>例如熟悉嘅公園，唔需要見人</small></span></button>
+            <button type="button" data-journey="water" aria-pressed="false"><span aria-hidden="true">💧</span><span><strong>留喺室內飲水</strong><small>唔出門都係完整選擇</small></span></button>
           </div>
-          <div id="stepStatus" class="step-status" aria-live="polite">揀一件你願意嘗試嘅事，或者唔揀都得。</div>
-          <div class="step-actions">
-            <button type="button" id="doneStep" class="text-btn" disabled>模擬完成微行動 <span>↗</span></button>
-            <button type="button" id="skipStep" class="text-btn muted-btn">今日唔想出門</button>
+          <div id="stepStatus" class="step-status" role="status" aria-live="polite" aria-atomic="true">今日想留喺邊個情境都得，唔揀都可以。</div>
+          <div class="journey-actions">
+            <button type="button" id="doneStep" disabled>模擬試過呢個情境</button>
+            <button type="button" id="skipStep">今日唔想出門／休息</button>
+            <button type="button" id="journeyClear" disabled>清除本次選擇</button>
           </div>
-        </div>
+          <p class="journey-note">冇實際定位、打卡紀錄、上傳或完成要求。戶外情境只供示範；現實中以自己安全、身體狀況及意願為先，唔舒服就停低或返回。</p>
+        </section>
         <div class="pet-social" id="petSocial">
           <div><strong>🐾 由寵物先打招呼</strong><small>未來社交概念 · 目前純模擬，冇連接任何真人</small></div>
           <button type="button" id="petHello" class="pet-hello-btn">試下模擬打招呼 →</button>
           <p id="petHelloMessage" class="pet-hello-message" aria-live="polite" hidden></p>
         </div>
-        <p class="footnote">✦ 呢度唔會存 GPS 定位，微行動只係模擬記錄。</p>
+        <p class="footnote">✦ 呢度冇 GPS 定位，微行動只係虛構情境，唔會保存出門紀錄。</p>
       </section>
 
       <section class="chat-panel" aria-label="同爪爪傾偈">
