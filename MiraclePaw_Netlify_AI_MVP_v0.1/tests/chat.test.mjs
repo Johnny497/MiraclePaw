@@ -1,16 +1,22 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import handler from '../netlify/functions/chat.mjs';
+import { verdict, moderation } from './fixtures/moderation.mjs';
 
 const previousEnv = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   DEMO_PASSCODE: process.env.DEMO_PASSCODE,
   OPENAI_MODEL: process.env.OPENAI_MODEL,
+  AI_CHAT_ENABLED: process.env.AI_CHAT_ENABLED,
+  AI_CHAT_DISABLED: process.env.AI_CHAT_DISABLED,
 };
 const nativeFetch = globalThis.fetch;
 const testCode = 'the-different-long-demo-password';
 
 before(() => {
+  process.env.AI_CHAT_ENABLED = 'true';
+  process.env.AI_CHAT_DISABLED = 'false';
+  globalThis.fetch = async () => { throw new Error('Unexpected external request'); };
   process.env.OPENAI_API_KEY = 'sk-test-not-real';
   process.env.DEMO_PASSCODE = testCode;
   process.env.OPENAI_MODEL = 'gpt-5.4-mini';
@@ -63,7 +69,8 @@ test('normal input uses independent input/output moderation and stateless Respon
   globalThis.fetch = async (url, init) => {
     calls.push({ url, body: JSON.parse(init.body) });
     if (String(url).endsWith('/moderations')) {
-      return new Response(JSON.stringify({ results: [{ flagged: false, categories: { 'self-harm': false, 'self-harm/intent': false, 'self-harm/instructions': false, violence: false, 'violence/graphic': false } }] }), { status: 200 });
+      const input = JSON.parse(init.body).input;
+      return new Response(JSON.stringify(moderation(Array.isArray(input) ? input.length : 1)), { status: 200 });
     }
     return new Response(JSON.stringify({ output: [{ content: [{ type: 'output_text', text: '你好呀！我記得你叫阿明。🍀' }] }] }), { status: 200 });
   };
@@ -79,13 +86,15 @@ test('normal input uses independent input/output moderation and stateless Respon
   assert.equal(calls[1].body.store, false);
   assert.equal(calls[1].body.model, 'gpt-5.4-mini');
   assert.equal(calls[1].body.input.length, 3);
+  assert.deepEqual(calls[0].body.input.slice(0, 3), calls[1].body.input.map(turn => turn.content));
+  assert.match(calls[0].body.input[3], /我叫阿明/);
 });
 
 test('moderation flags safety issues before response model call', async () => {
   let calls = 0;
   globalThis.fetch = async () => {
     calls += 1;
-    return new Response(JSON.stringify({ results: [{ categories: { 'self-harm/intent': true } }] }), { status: 200 });
+    return new Response(JSON.stringify({ results: [verdict({ 'self-harm/intent': true })] }), { status: 200 });
   };
   const response = await handler(req('我有啲危險嘅念頭'));
   assert.equal((await response.json()).crisis, true);

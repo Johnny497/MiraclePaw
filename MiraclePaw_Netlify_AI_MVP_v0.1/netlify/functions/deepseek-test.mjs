@@ -1,5 +1,6 @@
 // DeepSeek integration sandbox only. Not linked from UI, not approved for public AI use.
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { moderationDecision } from '../lib/moderation.mjs';
 
 const reply = (data, status = 200) => new Response(JSON.stringify(data), {
   status, headers: { 'content-type': 'application/json; charset=utf-8',
@@ -16,10 +17,7 @@ const safeFallback = '爪爪暫時未能安全回覆呢句，但我仍然喺度�
 async function moderate(text, key) {
   const response = await postJson('https://api.openai.com/v1/moderations',
     { model: 'omni-moderation-latest', input: text }, key);
-  const result = response?.results?.[0];
-  if (!result || typeof result.flagged !== 'boolean' || !result.categories)
-    throw new Error('invalid_moderation');
-  return result.flagged;
+  return moderationDecision(response);
 }
 async function postJson(url, payload, key, timeoutMs = 12000) {
   const controller = new AbortController();
@@ -35,7 +33,7 @@ async function postJson(url, payload, key, timeoutMs = 12000) {
 export default async function handler(request) {
   if (request.method !== 'POST') return reply({ error: 'POST only' }, 405);
   // Disabled by default, even if a key is configured. Never enable on Production.
-  if (process.env.AI_CHAT_DISABLED === 'true' || process.env.DEEPSEEK_TEST_ENABLED !== 'true')
+  if (process.env.AI_CHAT_DISABLED !== 'false' || process.env.DEEPSEEK_TEST_ENABLED !== 'true')
     return reply({ code: 'SANDBOX_DISABLED', error: 'DeepSeek sandbox is disabled.' }, 503);
   const passcode = process.env.DEEPSEEK_TEST_PASSCODE;
   const deepseekKey = process.env.DEEPSEEK_API_KEY;
@@ -58,8 +56,9 @@ export default async function handler(request) {
   if (crisis.test(message)) return reply({ reply: support, crisis: true });
   try {
     // Independent input moderation is mandatory. Fail closed if unavailable.
-    if (await moderate(message, moderationKey))
-      return reply({ reply: safeFallback, crisis: false, filtered: true });
+    const inputDecision = await moderate(message, moderationKey);
+    if (inputDecision === 'crisis') return reply({ reply: support, crisis: true });
+    if (inputDecision === 'filtered') return reply({ reply: safeFallback, crisis: false, filtered: true });
     const answer = await postJson('https://api.deepseek.com/chat/completions', {
       model: 'deepseek-chat', stream: false, max_tokens: 250, temperature: 0.5,
       messages: [
@@ -71,12 +70,14 @@ export default async function handler(request) {
     if (typeof output !== 'string' || !output.trim() || output.length > 1600) throw new Error('invalid_output');
     // Never display model text before independent output moderation succeeds.
     // The output check is an additional guardrail, not a clinical safety guarantee.
-    if (crisis.test(output) || await moderate(output, moderationKey))
-      return reply({ reply: safeFallback, crisis: false, filtered: true });
+    if (crisis.test(output)) return reply({ reply: support, crisis: true });
+    const outputDecision = await moderate(output, moderationKey);
+    if (outputDecision === 'crisis') return reply({ reply: support, crisis: true });
+    if (outputDecision === 'filtered') return reply({ reply: safeFallback, crisis: false, filtered: true });
     return reply({ reply: output, crisis: false, sandbox: true });
   } catch {
     // No secrets, user content or upstream response bodies in logs or response.
-    return reply({ code: 'SANDBOX_UNAVAILABLE', error: 'Sandbox unavailable; local companion remains free.' }, 503);
+    return reply({ code: 'SANDBOX_UNAVAILABLE', error: `Sandbox unavailable; local companion remains free. 香港支援：${hotline}；有即時危險請打香港 999。` }, 503);
   }
 }
 export const config = {

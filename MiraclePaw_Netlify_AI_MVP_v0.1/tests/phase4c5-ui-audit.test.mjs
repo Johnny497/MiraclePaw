@@ -28,9 +28,10 @@ test('model response is displayed only after server success (not independent pro
  assert.match(app,/addMessage\('assistant', decision\.text\)/);
 });
 test('operator kill switches exist in BOTH server functions',()=>{
- assert.match(api,/AI_CHAT_DISABLED === 'true'/);
+ assert.match(api,/AI_CHAT_DISABLED !== 'false'/);
+ assert.match(api,/AI_CHAT_ENABLED !== 'true'/);
  assert.match(sandbox,/DEEPSEEK_TEST_ENABLED !== 'true'/);
- assert.match(sandbox,/AI_CHAT_DISABLED === 'true'/);
+ assert.match(sandbox,/AI_CHAT_DISABLED !== 'false'/);
 });
 test('DeepSeek test route is not called by frontend',()=>{
  assert.doesNotMatch(app,/\/api\/deepseek-test/);

@@ -6,7 +6,7 @@ const source = await readFile(new URL('../netlify/functions/deepseek-test.mjs', 
 
 test('DeepSeek is gated, server-side only, and defaults off', () => {
   assert.match(source, /DEEPSEEK_TEST_ENABLED !== 'true'/);
-  assert.match(source, /AI_CHAT_DISABLED === 'true'/);
+  assert.match(source, /AI_CHAT_DISABLED !== 'false'/);
   assert.match(source, /DEEPSEEK_API_KEY/);
   assert.match(source, /DEEPSEEK_TEST_PASSCODE/);
   assert.match(source, /OPENAI_API_KEY/);
@@ -37,5 +37,8 @@ test('model output must pass independent moderation before returning', () => {
   assert.match(source, /await moderate\(message, moderationKey\)/);
   assert.match(source, /await moderate\(output, moderationKey\)/);
   assert.match(source, /const safeFallback/);
-  assert.match(source, /if \(crisis\.test\(output\) \|\| await moderate\(output, moderationKey\)\)/);
+  assert.match(source, /if \(crisis\.test\(output\)\) return reply\(\{ reply: support, crisis: true \}\)/);
+  assert.match(source, /const outputDecision = await moderate\(output, moderationKey\)/);
+  assert.match(source, /if \(outputDecision === 'filtered'\)/);
+  assert.match(source, /return moderationDecision\(response\)/);
 });

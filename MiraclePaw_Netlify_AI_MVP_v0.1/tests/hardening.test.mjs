@@ -1,20 +1,23 @@
 import test, {before, after} from 'node:test';
 import assert from 'node:assert/strict';
 import handler from '../netlify/functions/chat.mjs';
+import { moderation as mockModeration } from './fixtures/moderation.mjs';
 
 const prior = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   DEMO_PASSCODE: process.env.DEMO_PASSCODE,
   OPENAI_MODEL: process.env.OPENAI_MODEL,
+  AI_CHAT_ENABLED: process.env.AI_CHAT_ENABLED,
+  AI_CHAT_DISABLED: process.env.AI_CHAT_DISABLED,
 };
 const nativeFetch = globalThis.fetch;
 const code = 'only-mock-v1-3-demo-passcode';
-const moderation = {results:[{flagged:false,categories:{
-  'self-harm':false,'self-harm/intent':false,
-  'self-harm/instructions':false,violence:false,'violence/graphic':false,
-}}]};
+const moderation = mockModeration();
 
 before(()=>{
+  process.env.AI_CHAT_ENABLED = 'true';
+  process.env.AI_CHAT_DISABLED = 'false';
+  globalThis.fetch = async () => { throw new Error('Unexpected external request'); };
   process.env.OPENAI_API_KEY='sk-fake-test-not-a-real-key';
   process.env.DEMO_PASSCODE=code;
   process.env.OPENAI_MODEL='gpt-5.4-mini';

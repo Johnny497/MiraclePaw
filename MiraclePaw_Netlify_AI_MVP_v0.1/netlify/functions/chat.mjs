@@ -1,8 +1,10 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { moderationDecision } from '../lib/moderation.mjs';
 
 // MiraclePaw internal adult-stakeholder demo only. Not a production youth mental-health service.
 const HOTLINES = '撒瑪利亞會 2389 2222｜生命熱線 2382 0000';
 const crisisReply = `我聽到你而家可能好辛苦，我仍然喺度陪你。呢一刻先唔做任何任務，好嗎？你可以考慮即刻搵可信任嘅成年人或專業人士陪住你。香港支援熱線：${HOTLINES}。如果有人即時有危險，請打香港 999。你可以自己決定點樣求助；星爪唔會偷偷聯絡第三方。`;
+const safeFallback = '爪爪暫時未能安全回覆呢句，但我仍然喺度陪你。你可以轉用免費本地陪伴。';
 const KEYWORDS = [
   /自殺|自殘|想死|唔想活|不想活|結束生命|割(?:手|腕)|跳樓|傷害自己|傷害別人|傷害他人|殺(?:人|咗佢|死佢)|殺死佢/i,
   /kill myself|end my life|want to die|suicid(?:e|al)|self[ -]?harm|hurt myself|hurt someone|kill someone/i,
@@ -90,10 +92,9 @@ function extractText(response) {
 export default async function handler(request) {
   if (request.method !== 'POST') return json({ error: '只接受 POST 請求。' }, 405);
 
-  // Operator-controlled kill switch. Set AI_CHAT_DISABLED=true in Netlify
-  // environment variables to stop all upstream AI requests immediately.
-  // This does not disable the free kitten or static scripted demonstrations.
-  if (process.env.AI_CHAT_DISABLED === 'true') {
+  // Default deny: both explicit flags are required. Missing or invalid values block AI.
+  // The free kitten and scripted demonstrations remain available.
+  if (process.env.AI_CHAT_DISABLED !== 'false' || process.env.AI_CHAT_ENABLED !== 'true') {
     return json({
       code: 'AI_DISABLED',
       error: `AI 對話暫時由管理員關閉。爪爪基本陪伴同五個免費固定劇本仍然可以使用。如有即時危險請打香港 999；亦可自行聯絡 ${HOTLINES}。`,
@@ -135,31 +136,29 @@ export default async function handler(request) {
   }
 
   const inputText = message.trim();
-  if (looksLikeCrisis(inputText)) {
+  const recent = history.map(({ role, content }) => ({ role, content }));
+  const turns = [...recent, { role: 'user', content: inputText }];
+  const transcript = turns.map(({ role, content }) => `${role}: ${content}`).join('\n');
+  if (turns.some(({ content }) => looksLikeCrisis(content)) || looksLikeCrisis(transcript)) {
     return json({ reply: crisisReply, crisis: true });
   }
 
   try {
-    // Fail closed if moderation cannot be completed. Keyword fallback alone is not sufficient.
+    // Review every forwarded turn and their combined context in one moderation request.
+    // No truncation beyond the existing validated history/body limits.
+    const moderationInput = recent.length ? [...turns.map(({ content }) => content), transcript] : inputText;
     const moderation = await openai('moderations', {
       model: 'omni-moderation-latest',
-      input: inputText,
+      input: moderationInput,
     }, key);
-    const categories = moderation?.results?.[0]?.categories;
-    if (!categories) throw new Error('Moderation result missing');
-    if (categories['self-harm'] || categories['self-harm/intent'] ||
-        categories['self-harm/instructions'] || categories.violence || categories['violence/graphic']) {
-      return json({ reply: crisisReply, crisis: true });
-    }
+    const decision = moderationDecision(moderation, Array.isArray(moderationInput) ? moderationInput.length : 1);
+    if (decision === 'crisis') return json({ reply: crisisReply, crisis: true });
+    if (decision === 'filtered') return json({ reply: safeFallback, crisis: false, filtered: true });
 
-    const recent = history.map((h) => ({
-      role: h.role,
-      content: h.content.slice(0, 900),
-    }));
     const response = await openai('responses', {
       model: process.env.OPENAI_MODEL || 'gpt-5.4-mini',
       instructions: INSTRUCTIONS,
-      input: [...recent, { role: 'user', content: inputText }],
+      input: turns,
       max_output_tokens: 420,
       store: false,
     }, key);
@@ -173,17 +172,9 @@ export default async function handler(request) {
       model: 'omni-moderation-latest',
       input: reply,
     }, key);
-    const outputResult = outputModeration?.results?.[0];
-    if (typeof outputResult?.flagged !== 'boolean' || !outputResult.categories) {
-      throw new Error('Output moderation result missing');
-    }
-    const outputCategories = outputResult.categories;
-    if (outputResult.flagged || outputCategories['self-harm'] ||
-        outputCategories['self-harm/intent'] ||
-        outputCategories['self-harm/instructions'] ||
-        outputCategories.violence || outputCategories['violence/graphic']) {
-      return json({ reply: crisisReply, crisis: true });
-    }
+    const outputDecision = moderationDecision(outputModeration);
+    if (outputDecision === 'crisis') return json({ reply: crisisReply, crisis: true });
+    if (outputDecision === 'filtered') return json({ reply: safeFallback, crisis: false, filtered: true });
     return json({ reply: reply.slice(0, 1600), crisis: false });
   } catch (error) {
     // No raw user text, conversation history, API keys or upstream bodies in logs.
@@ -195,7 +186,7 @@ export default async function handler(request) {
     if (kind === 'TIMEOUT') {
       return json({ code: 'AI_TIMEOUT', error: 'AI 回應超時。今次訊息未能確認完成，請勿連續重試；可以先用固定劇本。' }, 504);
     }
-    return json({ code: 'AI_UNAVAILABLE', error: `AI 暫時未能回覆，安全檢查或模型服務可能未就緒。你可以先用固定劇本。緊急支援：${HOTLINES}。` }, 502);
+    return json({ code: 'AI_UNAVAILABLE', error: `AI 暫時未能回覆，安全檢查或模型服務可能未就緒。你可以先用固定劇本。緊急支援：${HOTLINES}；有即時危險請打香港 999。` }, 502);
   }
 }
 
