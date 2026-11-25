@@ -9,7 +9,7 @@ const prior = {
 };
 const nativeFetch = globalThis.fetch;
 const code = 'only-mock-v1-3-demo-passcode';
-const moderation = {results:[{categories:{
+const moderation = {results:[{flagged:false,categories:{
   'self-harm':false,'self-harm/intent':false,
   'self-harm/instructions':false,violence:false,'violence/graphic':false,
 }}]};
@@ -98,7 +98,7 @@ test('model response with explicit crisis terms routes to fixed support instead 
   assert.equal(calls,2);
 });
 
-test('normal model reply remains conversational; no extra moderation API cost',async()=>{
+test('normal model reply remains conversational after independent output moderation',async()=>{
   const calls=[];
   globalThis.fetch=async url=>{
     calls.push(String(url));
@@ -110,7 +110,10 @@ test('normal model reply remains conversational; no extra moderation API cost',a
   assert.equal(response.status,200);
   assert.equal(body.crisis,false);
   assert.match(body.reply,/慢慢嚟/);
-  assert.equal(calls.length,2);
+  assert.equal(calls.length,3);
+  assert.match(calls[0],/moderations$/);
+  assert.match(calls[1],/responses$/);
+  assert.match(calls[2],/moderations$/);
 });
 
 test('bad histories fail validation before any external request',async()=>{
