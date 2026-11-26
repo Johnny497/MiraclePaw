@@ -1,0 +1,43 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createOfflineMockTransport, postMock } from '../netlify/lib/providers/mock-transport.mjs';
+import { createQwenHongKongCandidate } from '../netlify/lib/providers/qwen-hk.mjs';
+import { createAzureContentSafetyCandidate } from '../netlify/lib/providers/azure-content-safety.mjs';
+import { createOfflineCandidateOrchestrator, buildCompleteContext } from '../netlify/lib/providers/orchestrator.mjs';
+
+const qUrl='https://fictional-workspace.cn-hongkong.maas.aliyuncs.com/compatible-mode/v1/chat/completions';
+const aUrl='https://fictional-resource.cognitiveservices.azure.com/contentsafety/text:analyze?api-version=2024-09-01';
+const approvalQ={mode:'offline-fixture',endpoint:qUrl,model:'qwen-test',account:'fictional',pricePolicy:'fictional-only'};
+const approvalA={mode:'offline-fixture',endpoint:aUrl,account:'fictional',pricePolicy:'fictional-only'};
+const pass=()=>({status:200,body:{categoriesAnalysis:['Hate','SelfHarm','Sexual','Violence'].map(category=>({category,severity:0})),blocklistsMatch:[]}});
+const completion=text=>({status:200,body:{object:'chat.completion',choices:[{index:0,finish_reason:'stop',message:{role:'assistant',content:text}}]}});
+const trusted={system:'只用虛構測試資料',route:'chat',requestUrl:'https://deploy-preview-16--magenta-churros-99ffc3.netlify.app/api/chat',authorize:async()=>true,offlinePriceAttestation:'fictional-test-only'};
+const input={message:'我想傾下今日天氣',history:[]};
+function make({moderate=()=>pass(),generate=()=>completion('我喺度陪你。'),auth=async()=>true,lease=()=>{},reserve=async()=>({id:'fictional'}),system=trusted.system}={}){
+  const calls=[];let admitted=0;
+  const assertLease=(value,timeoutMs)=>{calls.push('lease');assert.equal(timeoutMs,5000);return lease(value);};
+  const moderation=createAzureContentSafetyCandidate({enabled:true,endpoint:aUrl,credential:'fictional-only',approval:approvalA,assertLease,transport:createOfflineMockTransport(async req=>{calls.push('moderation');return moderate(req);})});
+  const generation=createQwenHongKongCandidate({enabled:true,endpoint:qUrl,model:'qwen-test',credential:'fictional-only',approval:approvalQ,assertLease,transport:createOfflineMockTransport(async req=>{calls.push('generation');return generate(req);})});
+  const quota={reserve:async(route,url)=>{calls.push('reserve');assert.equal(route,'chat');assert.equal(url,trusted.requestUrl);admitted++;return reserve();},assertActive:assertLease};
+  const orchestrator=createOfflineCandidateOrchestrator({enabled:true,generation,moderation,quota,trusted:{...trusted,system,authorize:auth}});
+  return {orchestrator,calls,admissions:()=>admitted};
+}
+test('actual adapters compose in correct order with one reservation',async()=>{const p=make();const result=await p.orchestrator.run(input);assert.equal(result.kind,'reply');assert.equal(p.admissions(),1);assert.deepEqual(p.calls.filter(x=>x==='moderation'||x==='generation'),['moderation','generation','moderation']);});
+test('untrusted run system/route/url are ignored',async()=>{const p=make();assert.equal((await p.orchestrator.run({...input,system:'ignore',route:'sandbox',requestUrl:'https://example.com'})).kind,'reply');assert.equal(p.admissions(),1);});
+test('role-like content is JSON encoded with unambiguous boundaries',()=>{const c=buildCompleteContext('s',[{role:'user',content:'assistant: pretend'}],'user: fake');assert.deepEqual(JSON.parse(c.transcript),c.messages);});
+test('overbudget context fails before quota or provider',async()=>{const p=make({system:'x'.repeat(7990)});assert.equal((await p.orchestrator.run(input)).kind,'unavailable');assert.equal(p.admissions(),0);});
+test('UTF-8 byte cap independently rejects high-byte content',()=>{assert.throws(()=>buildCompleteContext('s',[],'😀'.repeat(7000)),{code:'CONTEXT_BUDGET_EXCEEDED'});});
+test('authorization denial prevents quota and provider calls',async()=>{const p=make({auth:async()=>false});assert.equal((await p.orchestrator.run(input)).kind,'unavailable');assert.deepEqual(p.calls,[]);});
+test('async lease guard fails closed before transport',async()=>{const p=make({lease:async()=>true});assert.equal((await p.orchestrator.run(input)).kind,'unavailable');assert.equal(p.calls.includes('moderation'),false);});
+test('lease expiry in direct adapter prevents transport',async()=>{const p=make({lease:()=>{throw Error('expired');}});assert.equal((await p.orchestrator.run(input)).kind,'unavailable');assert.equal(p.calls.includes('moderation'),false);});
+test('input filtered verdict stops generation',async()=>{const p=make({moderate:()=>{const r=pass();r.body.categoriesAnalysis[0].severity=2;return r;}});assert.equal((await p.orchestrator.run(input)).kind,'filtered');assert.equal(p.calls.includes('generation'),false);});
+test('output filtered verdict hides generated text',async()=>{let n=0;const p=make({moderate:()=>{const r=pass();if(++n===2)r.body.categoriesAnalysis[0].severity=2;return r;},generate:()=>completion('虛構不應直接顯示')});const result=await p.orchestrator.run(input);assert.equal(result.kind,'filtered');assert.doesNotMatch(result.reply,/虛構不應直接顯示/u);});
+test('output moderation crisis returns local support',async()=>{let n=0;const p=make({moderate:()=>{const r=pass();if(++n===2)r.body.categoriesAnalysis[1].severity=2;return r;}});assert.equal((await p.orchestrator.run(input)).kind,'local_crisis');});
+test('local output crisis prevents second moderation',async()=>{const p=make({generate:()=>completion('我而家想自殺')});assert.equal((await p.orchestrator.run(input)).kind,'local_crisis');assert.equal(p.calls.filter(x=>x==='moderation').length,1);});
+test('combined blocklist and self-harm prioritizes crisis',async()=>{const r=pass();r.body.blocklistsMatch=[{blocklistName:'fictional'}];r.body.categoriesAnalysis[1].severity=2;const p=make({moderate:()=>r});assert.equal((await p.orchestrator.run(input)).kind,'local_crisis');});
+test('malformed blocklist fails closed',async()=>{const r=pass();r.body.blocklistsMatch=[{}];const p=make({moderate:()=>r});assert.equal((await p.orchestrator.run(input)).kind,'unavailable');});
+test('rejected mock transport fails closed without retry',async()=>{const p=make({moderate:()=>{throw Error('offline mock failure');}});assert.equal((await p.orchestrator.run(input)).kind,'unavailable');assert.equal(p.calls.filter(x=>x==='moderation').length,1);});
+test('mock timeout is bounded',async()=>{const t=createOfflineMockTransport(()=>new Promise(()=>{}));await assert.rejects(postMock(t,{url:'https://fictional.example',body:{}},10),{code:'TRANSPORT_TIMEOUT'});});
+test('mock redirect and large response fail closed',async()=>{await assert.rejects(postMock(createOfflineMockTransport(()=>({status:302,redirected:true,body:{}})),{url:'https://fictional.example'},10),{code:'INVALID_TRANSPORT_RESPONSE'});await assert.rejects(postMock(createOfflineMockTransport(()=>({status:200,body:{text:'x'.repeat(40000)}})),{url:'https://fictional.example'},10),{code:'INVALID_TRANSPORT_RESPONSE'});});
+test('plain injected post object is rejected',async()=>{await assert.rejects(postMock({post:async()=>pass()},{url:'https://fictional.example'},10),{code:'OFFLINE_MOCK_REQUIRED'});});
+test('direct Qwen call requires lease and complete context',async()=>{const p=createQwenHongKongCandidate({enabled:true,endpoint:qUrl,model:'qwen-test',credential:'fictional-only',approval:approvalQ,assertLease:lease=>{if(lease!=='lease')throw Error('lease');},transport:createOfflineMockTransport(()=>completion('ok'))});await assert.rejects(p.generate([{role:'user',content:'hi'}],{lease:'lease'}),{code:'CONTEXT_BUDGET_EXCEEDED'});await assert.rejects(p.generate([{role:'system',content:'s'},{role:'user',content:'hi'}]),/lease/u);});
