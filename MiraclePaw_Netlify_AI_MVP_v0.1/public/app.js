@@ -9,13 +9,15 @@
   const gateForm = $('gateForm');
   const crisisNotice = $('crisisNotice');
   const aiFallback = $('aiFallback');
+  const fallbackAdapter = window.MiraclePawAIFallback;
   const status = $('connectionStatus');
   const maxTurns = 20;
   const history = []; // In-memory only: not stored in localStorage or on our server.
   let demoPasscode = '';
   let sending = false;
   let count = 0;
-  let selectedStep = '';
+  let activeRequest = null;
+  const requestTimeoutMs = 30000;
 
   const crisisPattern = /自殺|自殘|想死|唔想活|不想活|結束生命|割(?:手|腕)|跳樓|傷害自己|傷害別人|傷害他人|殺(?:人|咗佢|死佢)|殺死佢|kill myself|end my life|want to die|suicid(?:e|al)|self[ -]?harm|hurt myself|hurt someone|kill someone/i;
   const crisisText = '我聽到你而家可能好辛苦，我仍然喺度陪你。呢一刻先唔做任何任務。香港支援熱線：撒瑪利亞會 2389 2222、生命熱線 2382 0000。如果有人即時有危險，請打 999。你可以自己選擇點樣求助，星爪唔會偷偷聯絡第三方。';
@@ -37,11 +39,12 @@
     return row;
   }
 
-  function setBusy(value) {
+  function setBusy(value, finalStatus = '') {
     sending = value;
     input.disabled = value || !demoPasscode || count >= maxTurns;
     sendButton.disabled = input.disabled;
     if (value) status.textContent = '爪爪諗緊點樣回覆你…';
+    else if (finalStatus) status.textContent = finalStatus + (count >= maxTurns ? ' · 今次試玩到達上限' : '');
     else if (count >= maxTurns) status.textContent = '今次試玩到達上限，請按右上角重新開始';
     else if (!demoPasscode) status.textContent = '免費本地陪伴模式 · AI 對話未啟用';
     else status.textContent = '已準備傳送，首次訊息將驗證連線';
@@ -86,37 +89,53 @@
     messages.appendChild(pending);
     messages.scrollTop = messages.scrollHeight;
 
+    const controller = new AbortController();
+    activeRequest = controller;
+    const timeout = setTimeout(() => controller.abort(), requestTimeoutMs);
+    let finalStatus = '';
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Demo-Passcode': demoPasscode },
         body: JSON.stringify({ message, history: history.slice(-12) }),
         cache: 'no-store',
+        signal: controller.signal,
       });
-      // Netlify's native rate limiter may send a bare 429 with HTML or no JSON.
-      // Handle it before parsing, show the free static fallback, never auto-retry.
-      if (response.status === 429) {
-        throw new Error('AI 試玩請求太密集，請稍後再試；爪爪基本陪伴同免費固定劇本一直都可以使用。');
+      // No retry. A bare 429 or malformed response must never expose model text.
+      const result = response.ok ? await response.json().catch(() => null) : null;
+      if (activeRequest !== controller) return;
+      if (controller.signal.aborted) throw new Error('Request timed out');
+      const decision = fallbackAdapter?.classify(response.status, result);
+      if (!decision || !decision.showModelText) {
+        throw new Error(response.status === 429
+          ? 'AI 試玩請求太密集；唔需要連續重試。'
+          : 'AI 暫時未能提供已確認嘅回覆。');
       }
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.error || 'AI 暫時唔可用。你可以先用免費固定劇本，唔需要連續重試。');
-      }
-      const reply = String(result.reply || '').trim();
-      if (!reply) throw new Error('AI 回覆為空，請稍後重試。');
       pending.remove();
-      addMessage('assistant', reply);
-      addHistory(message, reply);
-      if (result.crisis) showCrisis();
-      else $('petSpeech').textContent = '多謝你同我分享 🌼';
+      addMessage('assistant', decision.text);
+      addHistory(message, decision.text);
+      if (decision.crisis) {
+        showCrisis();
+        finalStatus = '危機支援資訊已顯示';
+      } else {
+        $('petSpeech').textContent = '多謝你同我分享 🌼';
+        finalStatus = '已收到伺服器回覆';
+      }
     } catch (error) {
+      if (activeRequest !== controller) return;
+      finalStatus = 'AI 暫時唔可用 · 免費本地陪伴仍然可以使用';
       pending.remove();
       if (aiFallback) aiFallback.hidden = false;
-      addMessage('system', error instanceof Error ? error.message : '暫時連線失敗，請先使用免費固定劇本。');
-      if (/密碼/.test(String(error?.message))) $('connectionStatus').textContent = '密碼錯誤，請按 ↻ 重新輸入';
+      // Error messages are fixed locally; never display upstream bodies.
+      const decision = fallbackAdapter?.classify(0, null, true);
+      addMessage('assistant', decision?.text || '爪爪仍然喺度陪你。你可以繼續使用免費本地陪伴。');
     } finally {
-      setBusy(false);
-      input.focus();
+      clearTimeout(timeout);
+      if (activeRequest === controller) {
+        activeRequest = null;
+        setBusy(false, finalStatus);
+        input.focus();
+      }
     }
   }
 
@@ -171,23 +190,6 @@
     button.addEventListener('click', () => send(button.dataset.prompt));
   });
 
-  document.querySelectorAll('[data-step]').forEach((button) => {
-    button.addEventListener('click', () => {
-      selectedStep = button.dataset.step;
-      document.querySelectorAll('[data-step]').forEach((b) => b.classList.toggle('selected', b === button));
-      $('stepStatus').textContent = `你揀咗「${selectedStep}」，做唔做都冇關係。`;
-      $('doneStep').disabled = false;
-    });
-  });
-  $('doneStep').addEventListener('click', () => {
-    if (!selectedStep) return;
-    addMessage('system', `模擬打卡：今日試咗「${selectedStep}」。呢個只係本頁展示，冇 GPS、冇上傳打卡資料。`);
-    $('stepStatus').textContent = '已完成模擬打卡！無論做唔做到，都值得被好好對待。';
-    $('petSpeech').textContent = '謝謝你願意試試 🌿';
-    document.querySelectorAll('[data-step]').forEach((b) => b.classList.remove('selected'));
-    selectedStep = '';
-    $('doneStep').disabled = true;
-  });
   function reassureNoOuting() {
     $('stepStatus').textContent = '今日唔出去完全可以。爪爪一樣陪住你。';
     $('petSpeech').textContent = '今日休息都得 🫶';
@@ -200,12 +202,16 @@
     button.addEventListener('click', reassureNoOuting)
   );
   $('petHello').addEventListener('click', () => {
-    const msg = $('petHelloMessage');
-    msg.textContent = '🐱 豆豆（虛構寵物）：Hi 爪爪！今日見到一朵好靚嘅雲 ☁️。呢段係純模擬嘅寵物互動，唔涉及真人配對、定位或資料分享。你可以完全唔跟進。';
-    msg.hidden = false;
-    $('petSpeech').textContent = 'Hi 豆豆！☁️';
+    // Optional fictional encounter; the module enforces admission and crisis pause.
+    window.MiraclePawPetSocial?.open();
   });
   $('resetChat').addEventListener('click', () => {
+    const previousRequest = activeRequest;
+    activeRequest = null;
+    previousRequest?.abort();
+    sending = false;
+    input.value = '';
+    $('passcode').value = '';
     history.length = 0;
     count = 0;
     messages.replaceChildren();

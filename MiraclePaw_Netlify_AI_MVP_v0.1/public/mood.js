@@ -75,5 +75,13 @@
     feedback.textContent = '本次心情記錄已清除。重新整理頁面亦會清除。';
   });
 
+  // The shared restart control clears all session-only demo state, including mood entries.
+  document.getElementById('resetChat')?.addEventListener('click', () => {
+    entries.length = 0;
+    render();
+    document.querySelectorAll('[data-feeling]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    feedback.textContent = '記錄只會留喺呢個網頁嘅記憶中，重新整理即清除。';
+  });
+
   render();
 })();

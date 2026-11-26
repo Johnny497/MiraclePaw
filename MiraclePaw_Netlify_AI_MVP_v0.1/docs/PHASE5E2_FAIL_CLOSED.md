@@ -1,0 +1,16 @@
+# Phase 5E-2 — offline safety hardening (candidate)
+
+Baseline: PR #16 commit `1d0a59e5fb1ba8276883e45e755a3d01e362003f`.
+This candidate is not authorization to enable any AI route, change Netlify settings, merge, or launch to real users. Keep AI disabled. This document supersedes older sandbox configuration descriptions where they differ.
+
+## Controls
+- Both server routes deny requests by default. An explicit global allow-state (`AI_CHAT_DISABLED` exactly `false`) and route-specific enable flag (`AI_CHAT_ENABLED` for chat; `DEEPSEEK_TEST_ENABLED` for sandbox) are required. Missing, invalid or disabled values block upstream calls. No changes to deployed environment variables are included. Existing passcodes, credentials, request bounds, rate-limit declarations, timeouts and non-retry behavior remain.
+- A shared server-only moderation validator requires the expected result count, an explicit boolean `flagged`, all 13 required text category booleans, and consistent aggregate/category verdicts. Additional categories must also be boolean. Unknown flagged categories are filtered. Missing, contradictory or malformed results fail closed. Provider schema changes require review; conservative blocking may produce false positives or service unavailability.
+- OpenAI chat checks local crisis terms across the bounded conversation and sends each forwarded turn plus a combined transcript for independent input moderation in a single batch request (up to 14 results). The generation payload is the same validated conversation. No extra history is collected or stored by the app. This increases the amount of text sent to the moderation service relative to the previous single-message check; provider retention, truncation/context capacity and cross-border processing still require review. Historical crisis terms can keep a session in conservative support mode until reset.
+- General flagged input/output returns fixed non-punitive reassurance without unreviewed model text. Crisis flags/keywords return fixed Hong Kong hotline support and no hidden third-party notification. Invalid/unavailable moderation returns a generic failure with hotline information; the existing browser fallback remains unchanged.
+- DeepSeek remains a single-message, separately gated sandbox. Independent input and output moderation remain mandatory; no frontend wiring is added.
+
+## Verification and limits
+Use synthetic fixtures and mocked fetch only. New tests cover both routes, missing/invalid flags, passcode rejection, complete/malformed/contradictory moderation, general and crisis filtering, full history and combined-context review, missing/extra batch results, no raw output on failure, and the normal mock pipeline. Existing server tests use complete synthetic verdicts and explicit test-only flags. No real keys or provider requests are required.
+
+Not a clinical safety certification. Global spend/request authorization, actual deployed kill switches and access controls, provider data-handling review, full history secret scan, and expert-reviewed Cantonese evaluation remain release blockers. The declared per-IP/domain edge limits are not global spend caps. Do not use real personal data, minors or NGO clients.
