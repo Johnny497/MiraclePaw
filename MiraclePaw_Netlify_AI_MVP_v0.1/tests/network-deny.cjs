@@ -1,0 +1,15 @@
+// Reproducible offline regression preloader. Use with NODE_OPTIONS=--require=./tests/network-deny.cjs.
+const net = require('node:net');
+const tls = require('node:tls');
+const http = require('node:http');
+const https = require('node:https');
+const dgram = require('node:dgram');
+const deny = () => { throw new Error('OFFLINE_TEST_NETWORK_DENIED'); };
+net.Socket.prototype.connect = deny;
+tls.connect = deny;
+http.request = deny;
+http.get = deny;
+https.request = deny;
+https.get = deny;
+dgram.Socket.prototype.send = deny;
+globalThis.fetch = deny;
