@@ -4,6 +4,7 @@ import { createOfflineMockTransport, postMock } from '../netlify/lib/providers/m
 import { createQwenHongKongCandidate } from '../netlify/lib/providers/qwen-hk.mjs';
 import { createAzureContentSafetyCandidate } from '../netlify/lib/providers/azure-content-safety.mjs';
 import { createOfflineCandidateOrchestrator, buildCompleteContext } from '../netlify/lib/providers/orchestrator.mjs';
+import { createOfflineQuotaAdapter, createOfflineTrustedConfig } from '../netlify/lib/providers/offline-runtime.mjs';
 
 const qUrl='https://fictional-workspace.cn-hongkong.maas.aliyuncs.com/compatible-mode/v1/chat/completions';
 const aUrl='https://fictional-resource.cognitiveservices.azure.com/contentsafety/text:analyze?api-version=2024-09-01';
@@ -13,13 +14,13 @@ const pass=()=>({status:200,body:{categoriesAnalysis:['Hate','SelfHarm','Sexual'
 const completion=text=>({status:200,body:{object:'chat.completion',choices:[{index:0,finish_reason:'stop',message:{role:'assistant',content:text}}]}});
 const trusted={system:'只用虛構測試資料',route:'chat',requestUrl:'https://deploy-preview-16--magenta-churros-99ffc3.netlify.app/api/chat',authorize:async()=>true,offlinePriceAttestation:'fictional-test-only'};
 const input={message:'我想傾下今日天氣',history:[]};
-function make({moderate=()=>pass(),generate=()=>completion('我喺度陪你。'),auth=async()=>true,lease=()=>{},reserve=async()=>({id:'fictional'}),system=trusted.system}={}){
+function make({moderate=()=>pass(),generate=()=>completion('我喺度陪你。'),auth=async()=>true,lease=()=>{},reserve=async()=>({route:'chat',windowId:'fictional',expiresAt:Date.now()+60000}),system=trusted.system}={}){
   const calls=[];let admitted=0;
   const assertLease=(value,timeoutMs)=>{calls.push('lease');assert.equal(timeoutMs,5000);return lease(value);};
   const moderation=createAzureContentSafetyCandidate({enabled:true,endpoint:aUrl,credential:'fictional-only',approval:approvalA,assertLease,transport:createOfflineMockTransport(async req=>{calls.push('moderation');return moderate(req);})});
   const generation=createQwenHongKongCandidate({enabled:true,endpoint:qUrl,model:'qwen-test',credential:'fictional-only',approval:approvalQ,assertLease,transport:createOfflineMockTransport(async req=>{calls.push('generation');return generate(req);})});
-  const quota={reserve:async(route,url)=>{calls.push('reserve');assert.equal(route,'chat');assert.equal(url,trusted.requestUrl);admitted++;return reserve();},assertActive:assertLease};
-  const orchestrator=createOfflineCandidateOrchestrator({enabled:true,generation,moderation,quota,trusted:{...trusted,system,authorize:auth}});
+  const quota=createOfflineQuotaAdapter({reserveQuota:async(route,url)=>{calls.push('reserve');assert.equal(route,'chat');assert.equal(url,trusted.requestUrl);admitted++;return reserve();},assertQuotaActive:assertLease});
+  const orchestrator=createOfflineCandidateOrchestrator({enabled:true,generation,moderation,quota,trusted:createOfflineTrustedConfig({...trusted,system,authorize:auth})});
   return {orchestrator,calls,admissions:()=>admitted};
 }
 test('actual adapters compose in correct order with one reservation',async()=>{const p=make();const result=await p.orchestrator.run(input);assert.equal(result.kind,'reply');assert.equal(p.admissions(),1);assert.deepEqual(p.calls.filter(x=>x==='moderation'||x==='generation'),['moderation','generation','moderation']);});

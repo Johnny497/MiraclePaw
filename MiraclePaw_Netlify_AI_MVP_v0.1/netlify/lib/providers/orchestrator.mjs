@@ -1,5 +1,6 @@
 import { triageInput, triageOutput, supportForModerationCrisis } from '../crisis-triage.mjs';
 import { ProviderFailure, requireProvider, checkLease, validateCompleteMessages, codePoints, utf8Bytes } from './contracts.mjs';
+import { isOfflineQuotaAdapter, isOfflineTrustedConfig } from './offline-runtime.mjs';
 
 export const CONTEXT_BUDGET_CODEPOINTS=8000;
 export const LOCAL_FALLBACK='爪爪暫時未能安全回覆呢句，但我仍然喺度陪你。你可以轉用免費本地陪伴。';
@@ -18,16 +19,14 @@ export function buildCompleteContext(system,history,message) { return boundedCon
 
 export function createOfflineCandidateOrchestrator({enabled=false,generation,moderation,quota,trusted}={}) {
   // Trusted values are captured once at construction; run() accepts message/history only.
-  const config=trusted && Object.freeze({system:trusted.system,route:trusted.route,requestUrl:trusted.requestUrl,authorize:trusted.authorize,offlinePriceAttestation:trusted.offlinePriceAttestation});
+  const config=trusted;
   return Object.freeze({
     async run({history=[],message}={}) {
       if (enabled!==true) return {kind:'disabled',reply:DISABLED};
       try {
         requireProvider(generation,'generate');requireProvider(moderation,'analyze');
-        if (!quota || typeof quota.reserve!=='function' || typeof quota.assertActive!=='function') throw new ProviderFailure('QUOTA_REQUIRED');
-        if (!config || !['chat','sandbox'].includes(config.route) || typeof config.requestUrl!=='string' ||
-            !/^https:\/\/deploy-preview-16--magenta-churros-99ffc3\.netlify\.app\//u.test(config.requestUrl) ||
-            typeof config.authorize!=='function' || config.offlinePriceAttestation!=='fictional-test-only') throw new ProviderFailure('TRUSTED_CONFIG_REQUIRED');
+        if (!isOfflineQuotaAdapter(quota)) throw new ProviderFailure('QUOTA_REQUIRED');
+        if (!isOfflineTrustedConfig(config)) throw new ProviderFailure('TRUSTED_CONFIG_REQUIRED');
         if (await config.authorize() !== true) throw new ProviderFailure('AUTH_DENIED');
         const local=triageInput(message,history);
         if (local.blockGeneration) return {kind:'local_crisis',reply:local.reply,crisis:true};

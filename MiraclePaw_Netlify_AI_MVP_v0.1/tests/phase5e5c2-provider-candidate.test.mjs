@@ -4,6 +4,7 @@ import { createQwenHongKongCandidate } from '../netlify/lib/providers/qwen-hk.mj
 import { createAzureContentSafetyCandidate } from '../netlify/lib/providers/azure-content-safety.mjs';
 import { buildCompleteContext, createOfflineCandidateOrchestrator } from '../netlify/lib/providers/orchestrator.mjs';
 import { createOfflineMockTransport } from '../netlify/lib/providers/mock-transport.mjs';
+import { createOfflineQuotaAdapter, createOfflineTrustedConfig } from '../netlify/lib/providers/offline-runtime.mjs';
 
 const qwenEndpoint='https://fictional-workspace.cn-hongkong.maas.aliyuncs.com/compatible-mode/v1/chat/completions';
 const azureEndpoint='https://fictional-resource.cognitiveservices.azure.com/contentsafety/text:analyze?api-version=2024-09-01';
@@ -44,9 +45,9 @@ function pipeline({moderationVerdicts=['pass','pass'],generationReply='我陪你
   const events=[];let checks=0,moderations=0;
   const generation={generate:async msgs=>{events.push(['generate',msgs]);return generationReply;}};
   const moderation={analyze:async value=>{events.push(['moderate',value]);return moderationVerdicts[moderations++];}};
-  const reserve=async (route,requestUrl)=>{events.push(['reserve',route,requestUrl]);if(reserveError)throw Error('quota');return 'lease';};
-  const assertActive=(lease,timeoutMs)=>{assert.equal(lease,'lease');assert.equal(timeoutMs,5000);checks++;if(expireAt===checks)throw Error('expired');};
-  const orchestrator=createOfflineCandidateOrchestrator({enabled:true,generation,moderation,quota:{reserve,assertActive},trusted:{system:'只用虛構測試資料',route:'chat',requestUrl:'https://deploy-preview-16--magenta-churros-99ffc3.netlify.app/api/chat',authorize:async()=>true,offlinePriceAttestation:'fictional-test-only'}});
+  const reserve=async (route,requestUrl)=>{events.push(['reserve',route,requestUrl]);if(reserveError)throw Error('quota');return {route,windowId:'fictional',expiresAt:Date.now()+60000};};
+  const assertActive=(lease,timeoutMs)=>{assert.equal(lease.windowId,'fictional');assert.equal(timeoutMs,5000);checks++;if(expireAt===checks)throw Error('expired');};
+  const orchestrator=createOfflineCandidateOrchestrator({enabled:true,generation,moderation,quota:createOfflineQuotaAdapter({reserveQuota:reserve,assertQuotaActive:assertActive}),trusted:createOfflineTrustedConfig({system:'只用虛構測試資料',route:'chat',requestUrl:'https://deploy-preview-16--magenta-churros-99ffc3.netlify.app/api/chat',authorize:async()=>true,offlinePriceAttestation:'fictional-test-only'})});
   return {orchestrator,events};
 }
 const benign={history:[],message:'今日想傾下天氣'};
