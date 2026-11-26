@@ -1,5 +1,6 @@
 // DeepSeek integration sandbox only. Not linked from UI, not approved for public AI use.
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { triageInput, triageOutput, supportForModerationCrisis } from '../lib/crisis-triage.mjs';
 import { moderationDecision } from '../lib/moderation.mjs';
 import { reserveQuota, assertQuotaActive, QuotaDenied } from '../lib/quota.mjs';
 
@@ -11,9 +12,7 @@ const equal = (a, b) => {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
   return timingSafeEqual(createHash('sha256').update(a).digest(), createHash('sha256').update(b).digest());
 };
-const crisis = /自殺|自殘|想死|唔想活|不想活|傷害自己|傷害別人|跳樓|kill myself|suicid|self[ -]?harm|hurt myself|kill someone/i;
 const hotline = '撒瑪利亞會 2389 2222｜生命熱線 2382 0000';
-const support = `爪爪仍然喺度陪你。你可以自行聯絡 ${hotline}；有即時危險請打香港 999。星爪唔會暗中通知其他人。`;
 const safeFallback = '爪爪暫時未能安全回覆呢句，但我仍然喺度陪你。你可以轉用免費本地陪伴。';
 async function moderate(text, key, lease) {
   const response = await postJson('https://api.openai.com/v1/moderations',
@@ -57,12 +56,13 @@ export default async function handler(request) {
   const message = data?.message;
   if (typeof message !== 'string' || !message.trim() || message.length > 300)
     return reply({ error: 'Invalid message' }, 400);
-  if (crisis.test(message)) return reply({ reply: support, crisis: true });
+  const localInput = triageInput(message); // Sandbox remains single-turn.
+  if (localInput.blockGeneration) return reply({ reply: localInput.reply, crisis: true });
   try {
     const lease = await reserveQuota('sandbox', request.url);
     // Independent input moderation is mandatory. Fail closed if unavailable.
     const inputDecision = await moderate(message, moderationKey, lease);
-    if (inputDecision === 'crisis') return reply({ reply: support, crisis: true });
+    if (inputDecision === 'crisis') return reply({ reply: supportForModerationCrisis().reply, crisis: true });
     if (inputDecision === 'filtered') return reply({ reply: safeFallback, crisis: false, filtered: true });
     const answer = await postJson('https://api.deepseek.com/chat/completions', {
       model: 'deepseek-chat', stream: false, max_tokens: 250, temperature: 0.5,
@@ -75,9 +75,10 @@ export default async function handler(request) {
     if (typeof output !== 'string' || !output.trim() || output.length > 1600) throw new Error('invalid_output');
     // Never display model text before independent output moderation succeeds.
     // The output check is an additional guardrail, not a clinical safety guarantee.
-    if (crisis.test(output)) return reply({ reply: support, crisis: true });
+    const localOutput = triageOutput(output);
+    if (localOutput.blockGeneration) return reply({ reply: localOutput.reply, crisis: true });
     const outputDecision = await moderate(output, moderationKey, lease);
-    if (outputDecision === 'crisis') return reply({ reply: support, crisis: true });
+    if (outputDecision === 'crisis') return reply({ reply: supportForModerationCrisis().reply, crisis: true });
     if (outputDecision === 'filtered') return reply({ reply: safeFallback, crisis: false, filtered: true });
     return reply({ reply: output, crisis: false, sandbox: true });
   } catch (error) {

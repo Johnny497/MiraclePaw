@@ -37,7 +37,8 @@ test('model output must pass independent moderation before returning', () => {
   assert.match(source, /await moderate\(message, moderationKey, lease\)/);
   assert.match(source, /await moderate\(output, moderationKey, lease\)/);
   assert.match(source, /const safeFallback/);
-  assert.match(source, /if \(crisis\.test\(output\)\) return reply\(\{ reply: support, crisis: true \}\)/);
+  assert.match(source, /const localOutput = triageOutput\(output\)/);
+  assert.match(source, /if \(localOutput\.blockGeneration\) return reply\(\{ reply: localOutput\.reply, crisis: true \}\)/);
   assert.match(source, /const outputDecision = await moderate\(output, moderationKey, lease\)/);
   assert.match(source, /if \(outputDecision === 'filtered'\)/);
   assert.match(source, /return moderationDecision\(response\)/);

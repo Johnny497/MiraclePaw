@@ -1,15 +1,11 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { triageInput, triageOutput, supportForModerationCrisis } from '../lib/crisis-triage.mjs';
 import { moderationDecision } from '../lib/moderation.mjs';
 import { reserveQuota, assertQuotaActive, QuotaDenied } from '../lib/quota.mjs';
 
 // MiraclePaw internal adult-stakeholder demo only. Not a production youth mental-health service.
 const HOTLINES = '撒瑪利亞會 2389 2222｜生命熱線 2382 0000';
-const crisisReply = `我聽到你而家可能好辛苦，我仍然喺度陪你。呢一刻先唔做任何任務，好嗎？你可以考慮即刻搵可信任嘅成年人或專業人士陪住你。香港支援熱線：${HOTLINES}。如果有人即時有危險，請打香港 999。你可以自己決定點樣求助；星爪唔會偷偷聯絡第三方。`;
 const safeFallback = '爪爪暫時未能安全回覆呢句，但我仍然喺度陪你。你可以轉用免費本地陪伴。';
-const KEYWORDS = [
-  /自殺|自殘|想死|唔想活|不想活|結束生命|割(?:手|腕)|跳樓|傷害自己|傷害別人|傷害他人|殺(?:人|咗佢|死佢)|殺死佢/i,
-  /kill myself|end my life|want to die|suicid(?:e|al)|self[ -]?harm|hurt myself|hurt someone|kill someone/i,
-];
 const MAX_BODY_BYTES = 30000;
 
 // Intentionally non-retrying upstream calls. 429/timeout failures are reported
@@ -44,10 +40,6 @@ function safeCompare(a, b) {
   const left = createHash('sha256').update(a, 'utf8').digest();
   const right = createHash('sha256').update(b, 'utf8').digest();
   return timingSafeEqual(left, right);
-}
-
-function looksLikeCrisis(message) {
-  return KEYWORDS.some((r) => r.test(message));
 }
 
 async function openai(path, body, key, lease) {
@@ -144,9 +136,8 @@ export default async function handler(request) {
   const recent = history.map(({ role, content }) => ({ role, content }));
   const turns = [...recent, { role: 'user', content: inputText }];
   const transcript = turns.map(({ role, content }) => `${role}: ${content}`).join('\n');
-  if (turns.some(({ content }) => looksLikeCrisis(content)) || looksLikeCrisis(transcript)) {
-    return json({ reply: crisisReply, crisis: true });
-  }
+  const localInput = triageInput(inputText, recent);
+  if (localInput.blockGeneration) return json({ reply: localInput.reply, crisis: true });
 
   try {
     const lease = await reserveQuota('chat', request.url);
@@ -158,7 +149,7 @@ export default async function handler(request) {
       input: moderationInput,
     }, key, lease);
     const decision = moderationDecision(moderation, Array.isArray(moderationInput) ? moderationInput.length : 1);
-    if (decision === 'crisis') return json({ reply: crisisReply, crisis: true });
+    if (decision === 'crisis') return json({ reply: supportForModerationCrisis().reply, crisis: true });
     if (decision === 'filtered') return json({ reply: safeFallback, crisis: false, filtered: true });
 
     const response = await openai('responses', {
@@ -171,7 +162,8 @@ export default async function handler(request) {
     const reply = extractText(response);
     if (!reply || reply.length > 1600) throw new Error('Invalid model response');
     // Conservative output keyword check; NOT a comprehensive or clinical safety test.
-    if (looksLikeCrisis(reply)) return json({ reply: crisisReply, crisis: true });
+    const localOutput = triageOutput(reply);
+    if (localOutput.blockGeneration) return json({ reply: localOutput.reply, crisis: true });
     // Phase 4C-6: independent output moderation. Fail closed on missing or malformed verdict.
     // This is a second API call, separate from the model generation request.
     const outputModeration = await openai('moderations', {
@@ -179,7 +171,7 @@ export default async function handler(request) {
       input: reply,
     }, key, lease);
     const outputDecision = moderationDecision(outputModeration);
-    if (outputDecision === 'crisis') return json({ reply: crisisReply, crisis: true });
+    if (outputDecision === 'crisis') return json({ reply: supportForModerationCrisis().reply, crisis: true });
     if (outputDecision === 'filtered') return json({ reply: safeFallback, crisis: false, filtered: true });
     return json({ reply: reply.slice(0, 1600), crisis: false });
   } catch (error) {

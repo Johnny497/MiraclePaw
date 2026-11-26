@@ -46,7 +46,7 @@ async function run(route, { env = {}, responses = [], payload = { message: '今�
 function support(result) {
   assert.equal(result.status, 200); assert.equal(result.data.crisis, true);
   assert.match(result.data.reply, /2389 2222/); assert.match(result.data.reply, /2382 0000/);
-  assert.match(result.data.reply, /999/); assert.match(result.data.reply, /唔會(?:偷偷聯絡第三方|暗中通知其他人)/);
+  assert.match(result.data.reply, /999/); assert.match(result.data.reply, /唔會(?:偷偷聯絡第三方|暗中通知(?:其他人|第三方))/);
 }
 function blocked(result, route, count) {
   assert.equal(result.status, route === 'chat' ? 502 : 503);

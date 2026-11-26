@@ -98,7 +98,7 @@ test('model response with explicit crisis terms routes to fixed support instead 
   assert.equal(body.crisis,true);
   assert.match(body.reply,/2389 2222/);
   assert.match(body.reply,/2382 0000/);
-  assert.match(body.reply,/唔會偷偷聯絡第三方/);
+  assert.match(body.reply,/唔會(?:偷偷聯絡|暗中通知)第三方/);
   assert.equal(calls,2);
 });
 
