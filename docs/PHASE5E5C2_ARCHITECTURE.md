@@ -1,18 +1,20 @@
 # Phase 5E-5C-2 offline provider candidate
 
+Phase 5E-5C-3 remediation supersedes the runtime and interface details below. See `PHASE5E5C3_REMEDIATION.md` and `PHASE5E5C2_INTERFACES.md` for the current candidate. R01–R06 remain OPEN.
+
 Baseline: `85e16b9a13b87f6692af7633c650367e0f52f6d2`. This is an offline, unconnected candidate. Existing live handlers and crisis patch are unchanged. All candidate providers and the orchestrator default to disabled. No endpoint, model, region, credential, transport, or provider account is configured by default.
 
 ## Flow
 
 1. Local crisis triage checks the complete current message and supplied history. A block returns the existing local response without quota or provider calls.
-2. Build one complete context from system prompt, at most 12 history turns, and current message. Count Unicode code points, including role labels. Reject above 8,000. Never truncate the moderation copy.
+2. Build one complete context from server-owned system prompt, at most 12 history turns, and current message. Encode the messages as JSON so roles cannot be forged by content. Reject above 8,000 Unicode code points or 24,000 UTF-8 bytes. Never truncate the moderation copy.
 3. Reserve one quota lease. Check lease validity before each remote stage.
 4. Independently moderate the entire exact context transcript. Only `pass` permits generation.
 5. Generate one nonstreaming answer from the same messages. Local output triage may block it.
 6. Independently moderate the entire generated answer. Only `pass` releases it.
 7. Any malformed response, exception, unavailable provider, quota failure, or expired lease returns a fixed local fallback. No retry, provider switching, streaming, or raw model output release.
 
-The candidate uses injected `transport.post` and has no native network transport. The existing free local companionship remains available. The existing fixed Hong Kong support text is supplied by the crisis triage module. No third-party notification is introduced.
+The candidate uses a branded offline mock transport with bounded request/response bytes and deadline, and has no native network transport. It accepts only an exact fictional credential and offline fixture attestation. The existing free local companionship remains available. The existing fixed Hong Kong support text is supplied by the crisis triage module. No third-party notification is introduced.
 
 ## Integration boundary
 

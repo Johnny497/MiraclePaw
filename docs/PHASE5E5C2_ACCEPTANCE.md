@@ -1,5 +1,7 @@
 # MiraclePaw Phase 5E-5C-2 offline candidate acceptance
 
+Historical local report only. Independent audit later found that the original remote files were at repository root, outside the app directory, so this local 276/276 count did **not** reproduce from the exact `cff44df` GitHub tree. Phase 5E-5C-3 relocates the files and reruns from a clean GitHub checkout; see `PHASE5E5C3_REMEDIATION.md` for current evidence. This correction preserves the original reported figures while clearly limiting them.
+
 Date: 2026-11-26 (Hong Kong). Fixed baseline: `85e16b9a13b87f6692af7633c650367e0f52f6d2`. Existing crisis patch was not reapplied. Candidate files add only two documents, four provider modules and one offline test file. Existing handlers and existing source files are byte-for-byte unchanged against the local baseline copy.
 
 ## Results

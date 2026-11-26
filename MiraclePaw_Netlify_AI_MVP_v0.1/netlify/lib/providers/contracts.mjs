@@ -28,7 +28,16 @@ export function freezeMessages(messages) {
 export function validateCompleteMessages(messages) {
   const checked = freezeMessages(messages);
   if (checked[0].role !== 'system' || checked.at(-1).role !== 'user' ||
-      checked.slice(1,-1).length > 12 || codePoints(JSON.stringify(checked)) > 8000 ||
+      checked.slice(1,-1).length > 12 || checked.slice(1,-1).some(x=>x.role==='system') ||
+      codePoints(JSON.stringify(checked)) > 8000 ||
       utf8Bytes(JSON.stringify(checked)) > 24000) throw new ProviderFailure('CONTEXT_BUDGET_EXCEEDED');
   return checked;
+}
+export async function withDeadline(operation, timeoutMs) {
+  if (typeof operation!=='function' || !Number.isSafeInteger(timeoutMs) || timeoutMs<1 || timeoutMs>5000) throw new ProviderFailure('INVALID_DEADLINE');
+  let timer;
+  try { return await Promise.race([
+    Promise.resolve().then(operation),
+    new Promise((_,reject)=>{timer=setTimeout(()=>reject(new ProviderFailure('STAGE_TIMEOUT')),timeoutMs);}),
+  ]); } finally { clearTimeout(timer); }
 }

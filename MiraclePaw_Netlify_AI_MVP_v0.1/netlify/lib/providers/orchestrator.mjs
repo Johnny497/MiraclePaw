@@ -1,5 +1,5 @@
 import { triageInput, triageOutput, supportForModerationCrisis } from '../crisis-triage.mjs';
-import { ProviderFailure, requireProvider, checkLease, validateCompleteMessages, codePoints, utf8Bytes } from './contracts.mjs';
+import { ProviderFailure, requireProvider, checkLease, validateCompleteMessages, codePoints, utf8Bytes, withDeadline } from './contracts.mjs';
 import { isOfflineQuotaAdapter, isOfflineTrustedConfig } from './offline-runtime.mjs';
 
 export const CONTEXT_BUDGET_CODEPOINTS=8000;
@@ -27,20 +27,20 @@ export function createOfflineCandidateOrchestrator({enabled=false,generation,mod
         requireProvider(generation,'generate');requireProvider(moderation,'analyze');
         if (!isOfflineQuotaAdapter(quota)) throw new ProviderFailure('QUOTA_REQUIRED');
         if (!isOfflineTrustedConfig(config)) throw new ProviderFailure('TRUSTED_CONFIG_REQUIRED');
-        if (await config.authorize() !== true) throw new ProviderFailure('AUTH_DENIED');
+        if (await withDeadline(()=>config.authorize(),5000) !== true) throw new ProviderFailure('AUTH_DENIED');
         const local=triageInput(message,history);
         if (local.blockGeneration) return {kind:'local_crisis',reply:local.reply,crisis:true};
         const context=boundedContext(config.system,history,message);
-        const lease=await quota.reserve(config.route,config.requestUrl); // Exact existing reserveQuota signature.
-        checkLease(quota.assertActive,lease,5000);const input=await moderation.analyze(context.transcript,{lease});
+        const lease=await withDeadline(()=>quota.reserve(config.route,config.requestUrl),5000); // Exact existing reserveQuota signature.
+        checkLease(quota.assertActive,lease,5000);const input=await withDeadline(()=>moderation.analyze(context.transcript,{lease}),5000);
         if (!['pass','crisis','filtered'].includes(input)) throw new ProviderFailure('INVALID_MODERATION_VERDICT');
         if (input==='crisis') return {kind:'local_crisis',reply:supportForModerationCrisis().reply,crisis:true};
         if (input==='filtered') return {kind:'filtered',reply:LOCAL_FALLBACK};
-        checkLease(quota.assertActive,lease,5000);const generated=await generation.generate(context.messages,{lease});
+        checkLease(quota.assertActive,lease,5000);const generated=await withDeadline(()=>generation.generate(context.messages,{lease}),5000);
         if (typeof generated!=='string' || !generated.trim() || codePoints(generated)>1600 || utf8Bytes(generated)>6400) throw new ProviderFailure('INVALID_GENERATION_RESPONSE');
         const outputLocal=triageOutput(generated);
         if (outputLocal.blockGeneration) return {kind:'local_crisis',reply:outputLocal.reply,crisis:true};
-        checkLease(quota.assertActive,lease,5000);const output=await moderation.analyze(generated,{lease});
+        checkLease(quota.assertActive,lease,5000);const output=await withDeadline(()=>moderation.analyze(generated,{lease}),5000);
         if (!['pass','crisis','filtered'].includes(output)) throw new ProviderFailure('INVALID_MODERATION_VERDICT');
         if (output==='crisis') return {kind:'local_crisis',reply:supportForModerationCrisis().reply,crisis:true};
         if (output==='filtered') return {kind:'filtered',reply:LOCAL_FALLBACK};
