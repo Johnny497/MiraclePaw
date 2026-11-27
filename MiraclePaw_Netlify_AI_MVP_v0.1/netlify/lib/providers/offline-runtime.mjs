@@ -23,8 +23,10 @@ export function createOfflineQuotaAdapter({reserveQuota,assertQuotaActive}={}) {
   if (typeof reserveQuota!=='function' || typeof assertQuotaActive!=='function') throw new ProviderFailure('QUOTA_REQUIRED');
   return Object.freeze({
     [QUOTA]:true,
-    async reserve(route,requestUrl) {
-      const lease=await reserveQuota(route,requestUrl);
+    async reserve(route,requestUrl,signal) {
+      if (signal?.aborted) throw new ProviderFailure('STAGE_CANCELLED');
+      const lease=await reserveQuota(route,requestUrl,{signal}); // Existing production function ignores optional offline signal.
+      if (signal?.aborted) throw new ProviderFailure('STAGE_CANCELLED');
       if (!isRecord(lease) || lease.route!==route || typeof lease.windowId!=='string' || !lease.windowId ||
           !Number.isSafeInteger(lease.expiresAt) || lease.expiresAt<=Date.now()+16000) throw new ProviderFailure('INVALID_LEASE');
       return Object.freeze({...lease});

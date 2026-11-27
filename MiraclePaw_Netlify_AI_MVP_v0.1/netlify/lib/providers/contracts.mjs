@@ -11,11 +11,15 @@ export function requireEnabled(enabled) {
 export function checkLease(assertLease, lease, timeoutMs) {
   if (typeof assertLease !== 'function') throw new ProviderFailure('LEASE_GUARD_REQUIRED');
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 5000) throw new ProviderFailure('INVALID_DEADLINE');
+  if (!isRecord(lease) || !['chat','sandbox'].includes(lease.route) ||
+      typeof lease.windowId!=='string' || !lease.windowId || !Number.isSafeInteger(lease.expiresAt) ||
+      Date.now()+timeoutMs+1000>=lease.expiresAt) throw new ProviderFailure('INVALID_LEASE');
   const result = assertLease(lease, timeoutMs);
   if (result && typeof result.then === 'function') {
     Promise.resolve(result).catch(() => {}); // Drain rejected async guards; never treat them as valid.
     throw new ProviderFailure('ASYNC_LEASE_GUARD_FORBIDDEN');
   }
+  if (result !== undefined) throw new ProviderFailure('INVALID_LEASE_GUARD_RESULT');
 }
 export function requireProvider(provider, method) {
   if (!provider || typeof provider[method] !== 'function') throw new ProviderFailure('PROVIDER_REQUIRED');
@@ -33,11 +37,17 @@ export function validateCompleteMessages(messages) {
       utf8Bytes(JSON.stringify(checked)) > 24000) throw new ProviderFailure('CONTEXT_BUDGET_EXCEEDED');
   return checked;
 }
-export async function withDeadline(operation, timeoutMs) {
+export async function withDeadline(operation, timeoutMs, parentSignal) {
   if (typeof operation!=='function' || !Number.isSafeInteger(timeoutMs) || timeoutMs<1 || timeoutMs>5000) throw new ProviderFailure('INVALID_DEADLINE');
-  let timer;
+  if (parentSignal?.aborted) throw new ProviderFailure('STAGE_CANCELLED');
+  const controller=new AbortController();let timer, cancel;
+  const stopped=new Promise((_,reject)=>{
+    cancel=()=>{controller.abort();reject(new ProviderFailure('STAGE_CANCELLED'));};
+    timer=setTimeout(()=>{controller.abort();reject(new ProviderFailure('STAGE_TIMEOUT'));},timeoutMs);
+  });
+  parentSignal?.addEventListener('abort',cancel,{once:true});
   try { return await Promise.race([
-    Promise.resolve().then(operation),
-    new Promise((_,reject)=>{timer=setTimeout(()=>reject(new ProviderFailure('STAGE_TIMEOUT')),timeoutMs);}),
-  ]); } finally { clearTimeout(timer); }
+    Promise.resolve().then(()=>{if(controller.signal.aborted)throw new ProviderFailure('STAGE_CANCELLED');return operation(controller.signal);}),
+    stopped,
+  ]); } finally { clearTimeout(timer);parentSignal?.removeEventListener('abort',cancel); }
 }
