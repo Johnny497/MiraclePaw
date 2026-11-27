@@ -2,14 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+import {triageInput as serverTriage} from '../netlify/lib/crisis-triage.mjs';
 
-const [app,html,fallbackSource]=await Promise.all([
+const [app,html,fallbackSource,triageSource]=await Promise.all([
   readFile(new URL('../public/app.js',import.meta.url),'utf8'),
   readFile(new URL('../public/index.html',import.meta.url),'utf8'),
-  readFile(new URL('../public/ai-fallback.js',import.meta.url),'utf8')
+  readFile(new URL('../public/ai-fallback.js',import.meta.url),'utf8'),
+  readFile(new URL('../public/crisis-triage-browser.js',import.meta.url),'utf8')
 ]);
 const browser={};
 vm.runInNewContext(fallbackSource,{globalThis:browser});
+vm.runInNewContext(triageSource,{window:browser});
 const ids=[
   'messages','chatForm','userInput','sendButton','gate','gateForm',
   'crisisNotice','aiFallback','connectionStatus','petSpeech',
@@ -65,7 +68,7 @@ function simulate(fetchImpl=async()=>new Response(JSON.stringify({error:'AI 暫�
   let timerId=0;
   const setTimeout=(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;};
   const clearTimeout=id=>timers.delete(id);
-  vm.runInNewContext(app,{document,fetch,Error,AbortController,setTimeout,clearTimeout,window:{MiraclePawAIFallback:browser.MiraclePawAIFallback}},{filename:'app.js'});
+  vm.runInNewContext(app,{document,fetch,Error,AbortController,setTimeout,clearTimeout,window:{MiraclePawAIFallback:browser.MiraclePawAIFallback,MiraclePawTriage:browser.MiraclePawTriage}},{filename:'app.js'});
   return {
     e,requests,localCompanion,timers,
     expire(){for(const {fn} of [...timers.values()])fn();},
@@ -122,6 +125,20 @@ test('new message hides old AI fallback, while local crisis response never invok
   assert.equal(e.crisisNotice.hidden,false);
   assert.match(e.messages.children.at(-1).children[0].textContent,/2389 2222/);
   assert.match(e.messages.children.at(-1).children[0].textContent,/2382 0000/);
+});
+
+test('frontend uses the exact server clarification for fictional denial without API request',async()=>{
+  const s=simulate();s.unlock();s.e.userInput.value='我冇自殺念頭';s.e.chatForm.fire('submit');await settle();
+  assert.equal(s.requests.length,0);
+  assert.equal(s.e.messages.children.at(-1).children[0].textContent,serverTriage('我冇自殺念頭').reply);
+});
+
+test('frontend keeps prior fictional crisis support on a later ordinary turn',async()=>{
+  const s=simulate();s.unlock();s.e.userInput.value='我想自殺';s.e.chatForm.fire('submit');await settle();
+  s.e.userInput.value='轉個話題，講天氣';s.e.chatForm.fire('submit');await settle();
+  assert.equal(s.requests.length,0);
+  assert.equal(s.e.messages.children.at(-1).children[0].textContent,
+    serverTriage('轉個話題，講天氣',[{role:'user',content:'我想自殺'},{role:'assistant',content:serverTriage('我想自殺').reply}]).reply);
 });
 
 test('reset hides fallback and reopens consent/password gate',async()=>{

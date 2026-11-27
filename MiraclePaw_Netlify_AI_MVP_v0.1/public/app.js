@@ -10,6 +10,7 @@
   const crisisNotice = $('crisisNotice');
   const aiFallback = $('aiFallback');
   const fallbackAdapter = window.MiraclePawAIFallback;
+  const triageAdapter = window.MiraclePawTriage;
   const status = $('connectionStatus');
   const maxTurns = 20;
   const history = []; // In-memory only: not stored in localStorage or on our server.
@@ -19,8 +20,7 @@
   let activeRequest = null;
   const requestTimeoutMs = 30000;
 
-  const crisisPattern = /自殺|自殘|想死|唔想活|不想活|結束生命|割(?:手|腕)|跳樓|傷害自己|傷害別人|傷害他人|殺(?:人|咗佢|死佢)|殺死佢|kill myself|end my life|want to die|suicid(?:e|al)|self[ -]?harm|hurt myself|hurt someone|kill someone/i;
-  const crisisText = '我聽到你而家可能好辛苦，我仍然喺度陪你。呢一刻先唔做任何任務。香港支援熱線：撒瑪利亞會 2389 2222、生命熱線 2382 0000。如果有人即時有危險，請打 999。你可以自己選擇點樣求助，星爪唔會偷偷聯絡第三方。';
+  const triageUnavailable = '爪爪暫時未能安全處理呢句；免費本地陪伴仍然可以使用。';
 
   function addMessage(role, text) {
     const row = document.createElement('div');
@@ -69,10 +69,18 @@
     input.value = '';
     input.style.height = 'auto';
 
-    // Quick local warning avoids waiting on the network; server independently checks too.
-    if (crisisPattern.test(message)) {
-      addMessage('assistant', crisisText);
-      addHistory(message, crisisText);
+    // Browser copy is generated from the existing server triage source and parity-tested.
+    // The server still independently checks every request; browser routing grants no authorization.
+    let local;
+    try { local = triageAdapter?.triageInput(message, history.slice(-12)); } catch { local = null; }
+    if (!local || typeof local.blockGeneration !== 'boolean') {
+      addMessage('assistant', triageUnavailable);
+      $('connectionStatus').textContent = 'AI 暫時唔可用 · 免費本地陪伴仍然可以使用';
+      return;
+    }
+    if (local.blockGeneration) {
+      addMessage('assistant', local.reply);
+      addHistory(message, local.reply);
       showCrisis();
       $('connectionStatus').textContent = '危機支援資訊已顯示';
       return;
