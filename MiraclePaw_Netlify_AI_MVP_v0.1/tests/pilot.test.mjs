@@ -8,11 +8,12 @@ import {
 } from '../public/pilot-data.js';
 
 const read = (file) => readFile(new URL('../public/' + file, import.meta.url), 'utf8');
-const [html, css, js, previewGuard, home, pitch, showcase, review, mood, app, backend] = await Promise.all([
+const [html, css, js, previewGuard, home, pitch, showcase, review, mood, app, backend, qwenTransport] = await Promise.all([
   read('pilot.html'), read('pilot.css'), read('pilot.js'), read('pilot-preview.js'),
   read('index.html'), read('pitch.html'), read('showcase.html'), read('review.html'),
   read('mood.js'), read('app.js'),
-  readFile(new URL('../netlify/functions/chat.mjs', import.meta.url), 'utf8')
+  readFile(new URL('../netlify/functions/presentation-chat.mjs', import.meta.url), 'utf8'),
+  readFile(new URL('../netlify/lib/presentation/qwen-transport.mjs', import.meta.url), 'utf8')
 ]);
 
 const requiredIds = [
@@ -102,13 +103,13 @@ test('privacy diagram matches actually inspected application data flow, with lim
   assert.match(mood,/const maxEntries = 10/);
   assert.match(app,/fetch\('\/api\/presentation-chat'/);
   assert.match(app,/history: history\.slice\(-12\)/);
-  assert.match(backend,/omni-moderation-latest/);
-  assert.match(backend,/store: false/);
-  assert.match(backend,/https:\/\/api\.openai\.com\/v1\//);
+  assert.match(backend,/triageInput/);
+  assert.match(backend,/triageOutput/);
+  assert.match(qwenTransport,/chat\/completions/);
   const chat=DATA_FLOW.find(x=>x.id==='chat');
   assert.ok(chat);
-  assert.match(chat.currently,/Netlify|api\/chat/);
-  assert.match(chat.destination,/OpenAI/);
+  assert.match(chat.currently,/api\/presentation-chat/);
+  assert.match(chat.destination,/Qwen/);
   assert.match(chat.knownBoundary,/日誌/);
   assert.match(chat.knownBoundary,/未經獨立核實/);
   const permissions=JSON.stringify(PERMISSION_PROPOSAL);

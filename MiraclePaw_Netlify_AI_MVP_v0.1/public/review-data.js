@@ -24,7 +24,7 @@ export const FAQ_ITEMS = Object.freeze([
   },
   {
     category:'評審', question:'而家係真正 AI 定固定劇本？',
-    answer:'/demo.html 同 /showcase.html 係事先撰寫嘅固定展示，唔使用 OpenAI API，唔等於真正 AI 理解或記憶。主網站另外有需要 API 額度同試玩密碼嘅真 AI 連線功能，但唔保證現時可成功回覆，亦未完成正式安全驗證。',
+    answer:'/demo.html 同 /showcase.html 係事先撰寫嘅固定展示，唔使用任何 AI API，唔等於真正 AI 理解或記憶。主網站另外有需要 API 額度同試玩密碼嘅真 AI 連線功能，但唔保證現時可成功回覆，亦未完成正式安全驗證。',
   },
   {
     category:'NGO', question:'可唔可以立即俾學生或未成年人正式使用？',

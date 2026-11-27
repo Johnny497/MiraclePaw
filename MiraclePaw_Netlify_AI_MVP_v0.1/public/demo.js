@@ -1,4 +1,4 @@
-// v0.6: standalone fictional story viewer; does not use OpenAI, live chat or personal data.
+// v0.6: standalone fictional story viewer; does not use any AI API, live chat or personal data.
 import { DEMO_SCENARIOS } from './demo-data.js';
 
 const $ = (id) => document.getElementById(id);

@@ -38,7 +38,7 @@ export const REVIEW_DOMAINS = Object.freeze([
   {
     id:'privacy', category:'私隱與資料治理', title:'資料流、知情同意及刪除',
     owner:'私隱／資訊安全責任人、合作 NGO 資料負責人（待委任）',
-    why:'心情記錄只喺本頁記憶體；但真 AI 對話會經 Netlify Function 將輸入及部分上下文送往 OpenAI。唔可以講成「所有聊天完全唔出裝置」。',
+    why:'心情記錄只喺本頁記憶體；但真 AI 對話會經 Netlify Function 將輸入及部分上下文送往 Alibaba Cloud Qwen（只限已啟用嘅私人展示版）。唔可以講成「所有聊天完全唔出裝置」。',
     discussion:[
       '完成實際資料流程圖，逐一核對平台日誌、API 供應商條款、處理地域、存取與保留政策；現時未經獨立審核。',
       '如果日後確實需要資料，先訂目的、最小必要欄位、知情同意、退出／刪除、事故通報、權限與處理合約；未審批前不得收集。',
@@ -157,7 +157,7 @@ export const RISK_ITEMS = Object.freeze([
 export const DATA_FLOW = Object.freeze([
   {
     id:'static', feature:'固定劇本／Pitch／FAQ',
-    currently:'純靜態預設資料；頁面本身毋須 OpenAI API。',
+    currently:'純靜態預設資料；頁面本身毋須任何 AI API。',
     destination:'瀏覽器呈現；網站初次載入由 Netlify 提供靜態檔案。',
     knownBoundary:'無真實服務使用者紀錄；平台存取日誌與其他基建資料待審核。',
     futureRequirement:'唔可將虛構劇本解讀為真實個案／AI 成效。',
@@ -171,8 +171,8 @@ export const DATA_FLOW = Object.freeze([
   },
   {
     id:'chat', feature:'選用真 AI 文字聊天',
-    currently:'已設定密碼閘口；用戶訊息及最多 12 條最近對話上下文交到 /api/chat，再按程式送往 OpenAI Moderations／Responses；Responses 設 store:false。',
-    destination:'瀏覽器 → Netlify Function → OpenAI API；沒有程式內建對話資料庫。',
+    currently:'已設定密碼閘口；用戶訊息及最多 12 條最近對話上下文交到 /api/presentation-chat，再按程式送往 Alibaba Cloud Qwen；呢個獨立展示版只作本地危機分流，未接 Azure 獨立審核。',
+    destination:'瀏覽器 → Netlify Function → Alibaba Cloud Qwen API；沒有程式內建對話資料庫。',
     knownBoundary:'平台日誌、供應商保留／處理安排及跨境資料流未經獨立核實；唔可以聲稱「聊天永遠不出裝置」。',
     futureRequirement:'完成供應商／平台資料處理審查、PICS 及適用法規／同意流程；NGO、家長、社工均不可閱覽對話原文。',
   },
