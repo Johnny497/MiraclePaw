@@ -41,11 +41,11 @@
 
   function setBusy(value, finalStatus = '') {
     sending = value;
-    input.disabled = value || !demoPasscode || count >= maxTurns;
+    input.disabled = value || !demoPasscode;
     sendButton.disabled = input.disabled;
     if (value) status.textContent = '爪爪諗緊點樣回覆你…';
     else if (finalStatus) status.textContent = finalStatus + (count >= maxTurns ? ' · 今次試玩到達上限' : '');
-    else if (count >= maxTurns) status.textContent = '今次試玩到達上限，請按右上角重新開始';
+    else if (count >= maxTurns) status.textContent = '今次 AI 試玩到達上限；本地危機支援同免費陪伴仍然可以使用';
     else if (!demoPasscode) status.textContent = '免費本地陪伴模式 · AI 對話未啟用';
     else status.textContent = '已準備傳送，首次訊息將驗證連線';
   }
@@ -62,8 +62,7 @@
 
   async function send(text) {
     const message = text.trim();
-    if (!demoPasscode || sending || !message || count >= maxTurns) return;
-    count += 1;
+    if (!demoPasscode || sending || !message) return;
     if (aiFallback) aiFallback.hidden = true;
     addMessage('user', message);
     input.value = '';
@@ -85,6 +84,12 @@
       $('connectionStatus').textContent = '危機支援資訊已顯示';
       return;
     }
+    if (count >= maxTurns) {
+      addMessage('assistant', '今次 AI 試玩已到上限；請唔好連續重試。免費本地陪伴同危機支援仍然可以使用。');
+      status.textContent = '今次 AI 試玩到達上限；本地危機支援同免費陪伴仍然可以使用';
+      return;
+    }
+    count += 1;
 
     setBusy(true);
     const pending = document.createElement('div');

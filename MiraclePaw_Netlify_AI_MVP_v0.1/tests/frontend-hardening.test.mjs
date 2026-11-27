@@ -141,6 +141,16 @@ test('frontend keeps prior fictional crisis support on a later ordinary turn',as
     serverTriage('轉個話題，講天氣',[{role:'user',content:'我想自殺'},{role:'assistant',content:serverTriage('我想自殺').reply}]).reply);
 });
 
+test('AI turn cap does not suppress free local crisis support',async()=>{
+  const s=simulate(async()=>new Response(JSON.stringify({reply:'我陪你傾下。',crisis:false}),{status:200}));s.unlock();
+  for(let i=0;i<20;i++){s.e.userInput.value='今日天氣好';s.e.chatForm.fire('submit');await settle();}
+  assert.equal(s.requests.length,20);
+  s.e.userInput.value='繼續傾天氣';s.e.chatForm.fire('submit');await settle();
+  assert.equal(s.requests.length,20);assert.match(s.e.messages.children.at(-1).children[0].textContent,/AI 試玩已到上限/u);
+  s.e.userInput.value='我而家想自殺';s.e.chatForm.fire('submit');await settle();
+  assert.equal(s.requests.length,20);assert.match(s.e.messages.children.at(-1).children[0].textContent,/2389 2222/u);
+});
+
 test('reset hides fallback and reopens consent/password gate',async()=>{
   const s=simulate(),e=s.e;
   s.unlock();
