@@ -102,7 +102,7 @@ test('outreach includes bilingual initial, follow-up and post-meeting drafts, wi
 });
 
 test('concept note accurately distinguishes in-memory mood, external AI chat and unsupported results',()=>{
-  assert.match(app,/fetch\('\/api\/chat'/);
+  assert.match(app,/fetch\('\/api\/presentation-chat'/);
   assert.match(app,/history: history\.slice\(-12\)/);
   assert.match(backend,/store: false/);
   for(const lang of ['zh','en']){

@@ -102,7 +102,7 @@
     const timeout = setTimeout(() => controller.abort(), requestTimeoutMs);
     let finalStatus = '';
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/api/presentation-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Demo-Passcode': demoPasscode },
         body: JSON.stringify({ message, history: history.slice(-12) }),

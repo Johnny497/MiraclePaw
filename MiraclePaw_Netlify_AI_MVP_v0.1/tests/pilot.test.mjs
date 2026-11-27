@@ -100,7 +100,7 @@ test('privacy diagram matches actually inspected application data flow, with lim
   assert.equal(PERMISSION_PROPOSAL.length,4);
   assert.match(mood,/const entries = \[\]/);
   assert.match(mood,/const maxEntries = 10/);
-  assert.match(app,/fetch\('\/api\/chat'/);
+  assert.match(app,/fetch\('\/api\/presentation-chat'/);
   assert.match(app,/history: history\.slice\(-12\)/);
   assert.match(backend,/omni-moderation-latest/);
   assert.match(backend,/store: false/);

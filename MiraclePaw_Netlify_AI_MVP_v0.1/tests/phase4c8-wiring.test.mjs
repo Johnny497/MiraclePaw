@@ -17,7 +17,7 @@ test('browser loads fallback adapter before app controller', () => {
 });
 test('chat UI does not invoke isolated DeepSeek test endpoint', () => {
   assert.doesNotMatch(app, /\/api\/deepseek-test|DEEPSEEK_API_KEY/);
-  assert.match(app, /fetch\('\/api\/chat'/);
+  assert.match(app, /fetch\('\/api\/presentation-chat'/);
 });
 test('failed requests use local response, no automatic retry', () => {
   assert.match(app, /response\.ok\s*\?\s*await response\.json\(\)\.catch\(\(\) => null\)/);

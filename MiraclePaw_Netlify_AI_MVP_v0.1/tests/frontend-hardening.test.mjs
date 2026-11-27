@@ -98,7 +98,7 @@ test('upstream AI failure exposes optional scripted-demo fallback without repeat
   e.chatForm.fire('submit');
   await settle();
   assert.equal(s.requests.length,1);
-  assert.equal(s.requests[0][0],'/api/chat');
+  assert.equal(s.requests[0][0],'/api/presentation-chat');
   assert.equal(e.aiFallback.hidden,false);
   assert.equal(e.sendButton.disabled,false);
   const replies=e.messages.children.filter(row=>row.className==='message assistant');
