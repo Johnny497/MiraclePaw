@@ -1,6 +1,6 @@
 # MiraclePaw private presentation Qwen candidate
 
-Prepared for Edwin and Charlie's 2026-11-28 adult-team demonstration. This branch is **code only**: it has not been deployed or connected to a real API key. The original `/api/chat`, PR #16, and the separate Qwen/Azure offline candidate architecture remain intact.
+Prepared for an invited adult-team demonstration on 2026-11-28. This branch is **code only**: it has not been deployed or connected to a real API key. The original `/api/chat`, PR #16, and the separate Qwen/Azure offline candidate architecture remain intact.
 
 ## What this branch does
 
