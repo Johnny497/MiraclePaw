@@ -23,7 +23,7 @@ test('presentation route has strict edge request limit',()=>{assert.equal(config
 test('default disabled makes zero paid or quota calls',async()=>{const s=setup({env:env({PRESENTATION_AI_ENABLED:'false'})});const r=await s.handler(request());assert.equal(r.status,503);assert.equal((await r.json()).code,'AI_DISABLED');assert.equal(s.calls.length,0);});
 test('wrong fictional passcode makes zero paid or quota calls',async()=>{const s=setup();const r=await s.handler(request('你好',[],'wrong-fictional'));assert.equal(r.status,401);assert.equal(s.calls.length,0);});
 test('local current and historical crisis bypass quota and DeepSeek',async()=>{const s=setup();for(const [message,history] of [['我而家想自殺',[]],['傾下天氣',[{role:'user',content:'我想自殺'}]]]){const r=await s.handler(request(message,history));assert.equal(r.status,200);const body=await r.json();assert.equal(body.crisis,true);assert.match(body.reply,/2389 2222/u);}assert.equal(s.calls.length,0);});
-test('one quota admission precedes one nonstreaming DeepSeek request',async()=>{const s=setup();const r=await s.handler(request('我叫阿明，今日想傾下天氣',[{role:'user',content:'你好'},{role:'assistant',content:'你好呀'}]));assert.equal(r.status,200);assert.equal((await r.json()).reply,'我喺度陪你。');assert.deepEqual(s.calls.map(x=>x[0]),['read-quota','quota','deepseek']);const q=s.calls[2];assert.equal(q[1],`${APPROVED_BASE_URL}/chat/completions`);assert.equal(q[2].redirect,'error');const body=JSON.parse(q[2].body);assert.equal(body.model,'deepseek-flash');assert.equal(body.stream,false);assert.deepEqual(body.thinking,{type:'disabled'});assert.equal(body.enable_thinking,undefined);assert.equal(body.n,1);assert.equal(body.max_tokens,420);assert.equal(body.messages.at(-1).content,'我叫阿明，今日想傾下天氣');assert.deepEqual(body.messages.slice(1,3).map(x=>x.content),['你好','你好呀']);});
+test('one quota admission precedes one nonstreaming DeepSeek request',async()=>{const s=setup();const r=await s.handler(request('我叫阿明，今日想傾下天氣',[{role:'user',content:'你好'},{role:'assistant',content:'你好呀'}]));assert.equal(r.status,200);assert.equal((await r.json()).reply,'我喺度陪你。');assert.deepEqual(s.calls.map(x=>x[0]),['read-quota','quota','deepseek']);const q=s.calls[2];assert.equal(q[1],`${APPROVED_BASE_URL}/chat/completions`);assert.equal(q[2].redirect,'error');const body=JSON.parse(q[2].body);assert.equal(body.model,'deepseek-flash');assert.equal(body.stream,false);assert.deepEqual(body.thinking,{type:'disabled'});assert.equal(body.enable_thinking,undefined);assert.equal(body.n,undefined);assert.equal(body.max_tokens,420);assert.equal(body.messages.at(-1).content,'我叫阿明，今日想傾下天氣');assert.deepEqual(body.messages.slice(1,3).map(x=>x.content),['你好','你好呀']);});
 test('model crisis output is replaced by fixed local support',async()=>{const s=setup({deepseekResult:deepseekResponse('我想自殺')});const r=await s.handler(request());assert.equal((await r.json()).crisis,true);assert.deepEqual(s.calls.map(x=>x[0]),['read-quota','quota','deepseek']);});
 test('malformed model response fails closed and never retries',async()=>{const s=setup({deepseekResult:new Response(JSON.stringify({object:'chat.completion',choices:[{index:0,finish_reason:'length',message:{role:'assistant',content:'partial'}}]}),{status:200,headers:{'content-type':'application/json'}})});const r=await s.handler(request());assert.equal(r.status,502);assert.equal((await r.json()).code,'AI_UNAVAILABLE');assert.deepEqual(s.calls.map(x=>x[0]),['read-quota','quota','deepseek']);});
 test('provider 429 makes one request and fixed limit response',async()=>{const s=setup({deepseekResult:new Response('fictional upstream error',{status:429})});const r=await s.handler(request());assert.equal(r.status,503);assert.equal((await r.json()).code,'AI_LIMIT');assert.deepEqual(s.calls.map(x=>x[0]),['read-quota','quota','deepseek']);});
@@ -81,4 +81,20 @@ test('transport deadline includes stalled body and fetch ignoring abort',async()
 test('request stream stops at byte limit even without a Content-Length header',async()=>{
   const s=setup();const r=new Request(url,{method:'POST',headers:{'x-demo-passcode':'fictional-demo-passcode'},body:'x'.repeat(30001)});
   assert.equal((await s.handler(r)).status,413);assert.equal(s.calls.length,0);
+});
+test('handler maps an upstream timeout to sanitized 504 and one burned reservation',async()=>{
+  const calls=[];const run=createPresentationHandler({env:env(),now:()=>now,
+    getQuotaStore:()=>({getWithMetadata:async()=>null,setJSON:async()=>{calls.push('quota');return {modified:true};}}),
+    fetchDeepSeek:async()=>{calls.push('provider');throw Object.assign(new Error('private-provider-timeout'),{name:'AbortError'});}});
+  const r=await run(request(),{deploy:{context:'deploy-preview'}});assert.equal(r.status,504);
+  assert.equal((await r.json()).code,'AI_TIMEOUT');assert.deepEqual(calls,['quota','provider']);
+});
+test('runtime works without the build-only CONTEXT env when trusted handler metadata is present',async()=>{
+  const s=setup({env:env({CONTEXT:undefined})});assert.equal((await s.handler(request())).status,200);
+});
+test('released replies always fit the existing next-turn history bound',async()=>{
+  const reply='a'.repeat(900);const s=setup({deepseekResult:deepseekResponse(reply)});
+  const first=await s.handler(request());assert.equal(first.status,200);
+  const next=setup();assert.equal((await next.handler(request('繼續傾',[{role:'user',content:'你好'},{role:'assistant',content:reply}]))).status,200);
+  const over=setup({deepseekResult:deepseekResponse('a'.repeat(901))});assert.equal((await over.handler(request())).status,502);
 });

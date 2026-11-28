@@ -18,7 +18,7 @@ export async function generateDeepSeekPresentation({env,messages,fetchImpl=globa
   if (typeof fetchImpl!=='function' || typeof assertLease!=='function' || !Array.isArray(messages) ||
       !Number.isSafeInteger(timeoutMs) || timeoutMs<1 || timeoutMs>TIMEOUT_MS) fail('CONFIG');
   assertLease(lease,timeoutMs);
-  const serialized=JSON.stringify({model:APPROVED_MODEL,messages,stream:false,n:1,max_tokens:420,thinking:{type:'disabled'}});
+  const serialized=JSON.stringify({model:APPROVED_MODEL,messages,stream:false,max_tokens:420,thinking:{type:'disabled'}});
   if (new TextEncoder().encode(serialized).length>MAX_REQUEST_BYTES) fail('CONTEXT');
   const controller=new AbortController();
   let timer;
@@ -48,8 +48,8 @@ export async function generateDeepSeekPresentation({env,messages,fetchImpl=globa
     if(body?.object!=='chat.completion' || !['deepseek-flash','deepseek-v4.1-flash-1017'].includes(body.model) ||
        !Array.isArray(choices) || choices.length!==1 || choice.index!==0 || choice.finish_reason!=='stop' ||
        message?.role!=='assistant' || typeof message.content!=='string' || !message.content.trim() ||
-       message.content.length>1600 || [...message.content].length>1600 ||
-       new TextEncoder().encode(message.content).length>6400 ||
+       message.content.length>900 || [...message.content].length>900 ||
+       new TextEncoder().encode(message.content).length>3600 ||
        message.tool_calls!=null || message.function_call!=null || message.refusal!=null ||
        (typeof message.reasoning_content==='string' && message.reasoning_content.trim())) fail('UNAVAILABLE');
     return message.content.trim();

@@ -72,3 +72,12 @@ test('deployment guard requires explicit approval, correct source branch and Pre
   assert.equal(deploymentApproved(good),true);assert.equal(deploymentApproved({}),false);
   for(const override of [{PRESENTATION_DEPLOY_APPROVED:'false'},{CONTEXT:'production'},{CONTEXT:'branch-deploy'},{HEAD:'dev/phase5e5c'}])assert.equal(deploymentApproved({...good,...override}),false);
 });
+test('CLI build/ignore gate exit codes block deploys and do not print injected secret sentinels',async()=>{
+  const {spawnSync}=await import('node:child_process');
+  const base={...process.env,DEEPSEEK_API_KEY:'fictional-secret-sentinel-never-public',CONTEXT:'deploy-preview',HEAD:'presentation/deepseek-flash-demo',PRESENTATION_DEPLOY_APPROVED:'false'};
+  const run=(extra,args=[])=>spawnSync(process.execPath,['scripts/presentation-deploy-guard.mjs',...args],{env:{...base,...extra},encoding:'utf8'});
+  assert.equal(run({}).status,1);assert.equal(run({},['--ignore']).status,0);
+  assert.equal(run({PRESENTATION_DEPLOY_APPROVED:'true'}).status,0);assert.equal(run({PRESENTATION_DEPLOY_APPROVED:'true'},['--ignore']).status,1);
+  const denied=run({PRESENTATION_DEPLOY_APPROVED:'true',CONTEXT:'production'});assert.equal(denied.status,1);
+  assert.doesNotMatch(denied.stdout+denied.stderr,/fictional-secret-sentinel/u);
+});
