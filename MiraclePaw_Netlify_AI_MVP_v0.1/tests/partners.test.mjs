@@ -108,7 +108,7 @@ test('concept note accurately distinguishes in-memory mood, external AI chat and
   for(const lang of ['zh','en']){
     const brief=ONE_PAGER[lang];
     assert.match(brief.privacy,/Netlify/);
-    assert.match(brief.privacy,/Qwen/);
+    assert.match(brief.privacy,/DeepSeek/);
     assert.match(brief.safety,/2389 2222/);
     assert.match(brief.safety,/2382 0000/);
     assert.match(brief.safety,/999/);

@@ -109,7 +109,7 @@ test('privacy diagram matches actually inspected application data flow, with lim
   const chat=DATA_FLOW.find(x=>x.id==='chat');
   assert.ok(chat);
   assert.match(chat.currently,/api\/presentation-chat/);
-  assert.match(chat.destination,/Qwen/);
+  assert.match(chat.destination,/DeepSeek/);
   assert.match(chat.knownBoundary,/日誌/);
   assert.match(chat.knownBoundary,/未經獨立核實/);
   const permissions=JSON.stringify(PERMISSION_PROPOSAL);
