@@ -102,12 +102,13 @@ test('outreach includes bilingual initial, follow-up and post-meeting drafts, wi
 });
 
 test('concept note accurately distinguishes in-memory mood, external AI chat and unsupported results',()=>{
-  assert.match(app,/fetch\('\/api\/chat'/);
+  assert.match(app,/fetch\('\/api\/presentation-chat'/);
   assert.match(app,/history: history\.slice\(-12\)/);
   assert.match(backend,/store: false/);
   for(const lang of ['zh','en']){
     const brief=ONE_PAGER[lang];
-    assert.match(brief.privacy,/Netlify|OpenAI/);
+    assert.match(brief.privacy,/Netlify/);
+    assert.match(brief.privacy,/DeepSeek/);
     assert.match(brief.safety,/2389 2222/);
     assert.match(brief.safety,/2382 0000/);
     assert.match(brief.safety,/999/);

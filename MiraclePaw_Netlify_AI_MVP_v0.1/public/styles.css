@@ -225,3 +225,22 @@
 .ai-fallback{background:#eff8ee;border-color:#bcdcc5;color:#365e45}
 .ai-fallback a{color:#276e4c;font-weight:800}
 .ai-fallback[hidden]{display:none!important}
+
+/* v1.5 — Free local-only stakeholder tour (not a youth service or behavioral score). */
+.tour-panel{margin:17px 0 19px;padding:17px 18px;background:#f0f8ed;border:1px solid #c9e2ce;border-radius:18px}
+.tour-kicker{display:block;color:#357655;font-size:11px;font-weight:800;letter-spacing:.25px}
+.tour-panel h2{font-size:18px;letter-spacing:-.4px;margin:8px 0}
+.tour-panel p{font-size:12px;line-height:1.8;color:#537363;margin:8px 0 11px}
+.tour-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tour-actions button{min-height:40px;border-radius:11px;padding:9px 12px;font-weight:750;font-size:12px}
+.tour-primary{background:#397e5e;color:white;border:1px solid #397e5e}
+.tour-primary:hover{background:#276c4c}
+.tour-secondary{background:#fffefa;border:1px solid #b6cfbc;color:#436b52}
+.tour-actions button[hidden]{display:none!important}
+.tour-panel .tour-note{font-size:10px;color:#748b79;margin-bottom:0}
+.local-entry{width:100%;margin-top:12px;padding:12px;border-radius:12px;border:1px solid #8bbda0;color:#2c7251;background:#e9f6eb;font-weight:800;font-size:13px}
+.local-entry:hover{background:#d6efdd}
+.local-entry-note{font-size:11px!important;line-height:1.7!important;color:#718578!important;margin:9px 0 0!important}
+.local-entry:focus-visible,.tour-actions button:focus-visible{outline:3px solid #357b5b;outline-offset:3px}
+#littleSteps:focus,#moodCheckin:focus{outline:2px solid #5b9c78;outline-offset:5px}
+@media(max-width:560px){.tour-panel{padding:15px}.tour-actions button{flex:1 1 auto}}

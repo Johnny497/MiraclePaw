@@ -76,7 +76,7 @@ test('demo consent gate is explicitly for adults and does not require AI credent
   assert.match(demoHtml, /id="demoAdultAgree"/);
   assert.match(demoHtml, /id="demoStart"[^>]*disabled/);
   assert.match(demoHtml, /僅供成年|只供成年/);
-  assert.match(demoHtml, /唔需要 OpenAI API Key 或試玩密碼/);
+  assert.match(demoHtml, /唔需要任何 AI API Key 或試玩密碼/);
   assert.match(demoHtml, /固定劇本 · 非真實 AI/);
   assert.match(demoJs, /if \(!\$\('demoAdultAgree'\)\.checked\) return/);
 });

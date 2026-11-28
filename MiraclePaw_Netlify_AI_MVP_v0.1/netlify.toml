@@ -1,4 +1,6 @@
 [build]
+  ignore = "node ./scripts/presentation-deploy-guard.mjs --ignore"
+  command = "node ./scripts/presentation-deploy-guard.mjs"
   publish = "public"
   functions = "netlify/functions"
 

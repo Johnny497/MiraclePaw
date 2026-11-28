@@ -1,0 +1,14 @@
+.local-companion { margin: 18px 0; padding: 18px; border: 1px solid #dce8df; border-radius: 20px; background: #f5faf3; color: #365e45; }
+.local-companion h2 { margin: 6px 0; font-size: 19px; line-height: 1.4; }
+.local-companion p { font-size: 13px; line-height: 1.7; margin: 8px 0; }
+.local-companion .local-kicker { color: #3d7054; font-weight: 700; font-size: 11px; }
+.local-companion fieldset { border: 0; padding: 0; margin: 12px 0; min-width: 0; }
+.local-companion legend { font-size: 13px; font-weight: 700; margin-bottom: 7px; }
+.local-companion .local-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.local-companion button { min-height: 44px; padding: 9px 12px; border: 1px solid #91b39b; border-radius: 12px; background: #fffefa; color: #345b44; font: inherit; font-size: 13px; }
+.local-companion button[aria-pressed="true"] { background: #dceee0; border-color: #437d59; font-weight: 700; }
+.local-companion button:focus-visible, .local-companion a:focus-visible { outline: 3px solid #357b5b; outline-offset: 3px; }
+.local-companion button:disabled { opacity: .6; }
+.local-companion .local-reply { padding: 12px; border-radius: 12px; background: #e5f1e5; min-height: 54px; }
+.local-companion a { color: #276e4c; font-weight: 700; }
+.local-companion[hidden] { display: none !important; }

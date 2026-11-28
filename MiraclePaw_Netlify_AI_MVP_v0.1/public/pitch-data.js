@@ -131,7 +131,7 @@ export const PROPOSED_MEASURES = Object.freeze([
 ]);
 
 export const FALLBACK_STEPS = Object.freeze([
-  { id:'static', title:'網絡或 API 不穩定', instruction:'轉用 /demo.html 五個固定劇本；頁面載入後的劇本互動不需 OpenAI API。', warning:'網站初次載入仍須網絡（除非事先獲授權在本機備妥靜態副本）。' },
+  { id:'static', title:'網絡或 API 不穩定', instruction:'轉用 /demo.html 五個固定劇本；頁面載入後的劇本互動不需任何 AI API。', warning:'網站初次載入仍須網絡（除非事先獲授權在本機備妥靜態副本）。' },
   { id:'gate', title:'展示前確認成年使用範圍', instruction:'所有獨立展示頁都保留成年人自我確認。只用虛構故事，唔請觀眾提供個人經歷。', warning:'勾選並非正式年齡或身份驗證。' },
   { id:'safety', title:'遇到現場真實求助', instruction:'停止用產品當場處理危機；遵循機構真實支援程序。劇本只係演示設計思路。', warning:'正式使用前仍需要專業危機支援流程審核。' }
 ]);

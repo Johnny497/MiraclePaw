@@ -1,12 +1,11 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { triageInput, triageOutput, supportForModerationCrisis } from '../lib/crisis-triage.mjs';
+import { moderationDecision } from '../lib/moderation.mjs';
+import { reserveQuota, assertQuotaActive, QuotaDenied } from '../lib/quota.mjs';
 
 // MiraclePaw internal adult-stakeholder demo only. Not a production youth mental-health service.
 const HOTLINES = '撒瑪利亞會 2389 2222｜生命熱線 2382 0000';
-const crisisReply = `我聽到你而家可能好辛苦，我仍然喺度陪你。呢一刻先唔做任何任務，好嗎？你可以考慮即刻搵可信任嘅成年人或專業人士陪住你。香港支援熱線：${HOTLINES}。如果有人即時有危險，請打香港 999。你可以自己決定點樣求助；星爪唔會偷偷聯絡第三方。`;
-const KEYWORDS = [
-  /自殺|自殘|想死|唔想活|不想活|結束生命|割(?:手|腕)|跳樓|傷害自己|傷害別人|傷害他人|殺(?:人|咗佢|死佢)|殺死佢/i,
-  /kill myself|end my life|want to die|suicid(?:e|al)|self[ -]?harm|hurt myself|hurt someone|kill someone/i,
-];
+const safeFallback = '爪爪暫時未能安全回覆呢句，但我仍然喺度陪你。你可以轉用免費本地陪伴。';
 const MAX_BODY_BYTES = 30000;
 
 // Intentionally non-retrying upstream calls. 429/timeout failures are reported
@@ -43,21 +42,21 @@ function safeCompare(a, b) {
   return timingSafeEqual(left, right);
 }
 
-function looksLikeCrisis(message) {
-  return KEYWORDS.some((r) => r.test(message));
-}
-
-async function openai(path, body, key) {
+async function openai(path, body, key, lease) {
+  assertQuotaActive(lease, 20000);
+  const serialized = JSON.stringify(body);
+  if (Buffer.byteLength(serialized, 'utf8') > (path === 'moderations' ? 64000 : 36000)) throw new QuotaDenied();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20000);
   try {
     const response = await fetch(`https://api.openai.com/v1/${path}`, {
       method: 'POST',
+      redirect: 'error',
       headers: {
         'Authorization': `Bearer ${key}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: serialized,
       signal: controller.signal,
     });
     if (!response.ok) {
@@ -90,10 +89,9 @@ function extractText(response) {
 export default async function handler(request) {
   if (request.method !== 'POST') return json({ error: '只接受 POST 請求。' }, 405);
 
-  // Operator-controlled kill switch. Set AI_CHAT_DISABLED=true in Netlify
-  // environment variables to stop all upstream AI requests immediately.
-  // This does not disable the free kitten or static scripted demonstrations.
-  if (process.env.AI_CHAT_DISABLED === 'true') {
+  // Default deny: both explicit flags are required. Missing or invalid values block AI.
+  // The free kitten and scripted demonstrations remain available.
+  if (process.env.AI_CHAT_DISABLED !== 'false' || process.env.AI_CHAT_ENABLED !== 'true') {
     return json({
       code: 'AI_DISABLED',
       error: `AI 對話暫時由管理員關閉。爪爪基本陪伴同五個免費固定劇本仍然可以使用。如有即時危險請打香港 999；亦可自行聯絡 ${HOTLINES}。`,
@@ -135,42 +133,50 @@ export default async function handler(request) {
   }
 
   const inputText = message.trim();
-  if (looksLikeCrisis(inputText)) {
-    return json({ reply: crisisReply, crisis: true });
-  }
+  const recent = history.map(({ role, content }) => ({ role, content }));
+  const turns = [...recent, { role: 'user', content: inputText }];
+  const transcript = turns.map(({ role, content }) => `${role}: ${content}`).join('\n');
+  const localInput = triageInput(inputText, recent);
+  if (localInput.blockGeneration) return json({ reply: localInput.reply, crisis: true });
 
   try {
-    // Fail closed if moderation cannot be completed. Keyword fallback alone is not sufficient.
+    const lease = await reserveQuota('chat', request.url);
+    // Review every forwarded turn and their combined context in one moderation request.
+    // No truncation beyond the existing validated history/body limits.
+    const moderationInput = recent.length ? [...turns.map(({ content }) => content), transcript] : inputText;
     const moderation = await openai('moderations', {
       model: 'omni-moderation-latest',
-      input: inputText,
-    }, key);
-    const categories = moderation?.results?.[0]?.categories;
-    if (!categories) throw new Error('Moderation result missing');
-    if (categories['self-harm'] || categories['self-harm/intent'] ||
-        categories['self-harm/instructions'] || categories.violence || categories['violence/graphic']) {
-      return json({ reply: crisisReply, crisis: true });
-    }
+      input: moderationInput,
+    }, key, lease);
+    const decision = moderationDecision(moderation, Array.isArray(moderationInput) ? moderationInput.length : 1);
+    if (decision === 'crisis') return json({ reply: supportForModerationCrisis().reply, crisis: true });
+    if (decision === 'filtered') return json({ reply: safeFallback, crisis: false, filtered: true });
 
-    const recent = history.map((h) => ({
-      role: h.role,
-      content: h.content.slice(0, 900),
-    }));
     const response = await openai('responses', {
-      model: process.env.OPENAI_MODEL || 'gpt-5.4-mini',
+      model: 'gpt-5.4-mini',
       instructions: INSTRUCTIONS,
-      input: [...recent, { role: 'user', content: inputText }],
+      input: turns,
       max_output_tokens: 420,
       store: false,
-    }, key);
+    }, key, lease);
     const reply = extractText(response);
-    if (!reply) throw new Error('Empty model response');
+    if (!reply || reply.length > 1600) throw new Error('Invalid model response');
     // Conservative output keyword check; NOT a comprehensive or clinical safety test.
-    if (looksLikeCrisis(reply)) return json({ reply: crisisReply, crisis: true });
+    const localOutput = triageOutput(reply);
+    if (localOutput.blockGeneration) return json({ reply: localOutput.reply, crisis: true });
+    // Phase 4C-6: independent output moderation. Fail closed on missing or malformed verdict.
+    // This is a second API call, separate from the model generation request.
+    const outputModeration = await openai('moderations', {
+      model: 'omni-moderation-latest',
+      input: reply,
+    }, key, lease);
+    const outputDecision = moderationDecision(outputModeration);
+    if (outputDecision === 'crisis') return json({ reply: supportForModerationCrisis().reply, crisis: true });
+    if (outputDecision === 'filtered') return json({ reply: safeFallback, crisis: false, filtered: true });
     return json({ reply: reply.slice(0, 1600), crisis: false });
   } catch (error) {
     // No raw user text, conversation history, API keys or upstream bodies in logs.
-    const kind = error instanceof UpstreamFailure ? error.kind : 'UNAVAILABLE';
+    const kind = error instanceof QuotaDenied ? 'LIMIT' : error instanceof UpstreamFailure ? error.kind : 'UNAVAILABLE';
     console.error('MiraclePaw AI upstream failure class:', kind);
     if (kind === 'LIMIT') {
       return json({ code: 'AI_LIMIT', error: 'AI 服務暫時達到使用限制。唔使重複傳送；你仍然可以開啟免費固定劇本，爪爪嘅基本陪伴唔會消失。' }, 503);
@@ -178,7 +184,7 @@ export default async function handler(request) {
     if (kind === 'TIMEOUT') {
       return json({ code: 'AI_TIMEOUT', error: 'AI 回應超時。今次訊息未能確認完成，請勿連續重試；可以先用固定劇本。' }, 504);
     }
-    return json({ code: 'AI_UNAVAILABLE', error: `AI 暫時未能回覆，安全檢查或模型服務可能未就緒。你可以先用固定劇本。緊急支援：${HOTLINES}。` }, 502);
+    return json({ code: 'AI_UNAVAILABLE', error: `AI 暫時未能回覆，安全檢查或模型服務可能未就緒。你可以先用固定劇本。緊急支援：${HOTLINES}；有即時危險請打香港 999。` }, 502);
   }
 }
 
